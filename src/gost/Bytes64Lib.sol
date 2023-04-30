@@ -41,6 +41,46 @@ library Bytes64Lib {
         }
     }
 
+    /**
+     * Unpack uint64 into 8 uint8 components
+     */
+    function unpack512(
+        bytes memory src
+    )
+        public
+        pure
+        returns (
+            uint64 r0,
+            uint64 r1,
+            uint64 r2,
+            uint64 r3,
+            uint64 r4,
+            uint64 r5,
+            uint64 r6,
+            uint64 r7
+        )
+    {
+        assert(src.length == 64);
+
+        assembly {
+            let bytes8mask := 0xffffffffffffffffffffffffffffffff
+            // first 32 bytes contains length of array
+            let hiR := mload(add(src, 32))
+            let loR := mload(add(src, 64))
+
+            // memory allocation: r0 ... r8
+            r0 := and(bytes8mask, shr(192, hiR))
+            r1 := and(bytes8mask, shr(128, hiR))
+            r2 := and(bytes8mask, shr(64, hiR))
+            r3 := and(bytes8mask, hiR)
+
+            r4 := and(bytes8mask, shr(192, loR))
+            r5 := and(bytes8mask, shr(128, loR))
+            r6 := and(bytes8mask, shr(64, loR))
+            r7 := and(bytes8mask, loR)
+        }
+    }
+
     function copy(
         bytes memory dst,
         bytes memory src,

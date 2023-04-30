@@ -186,4 +186,33 @@ contract TestBytes64LibTest is Test {
             hex"0101010101010101010101010101010101010101010101010101010101010100"
         );
     }
+
+    function test_unpack512() external {
+        bytes memory val = new bytes(64);
+        val.copy(
+            hex"0000000000000000111111111111111122222222222222223333333333333333"
+            hex"4444444444444444555555555555555566666666666666667777777777777777",
+            64
+        );
+
+        (
+            uint64 r0,
+            uint64 r1,
+            uint64 r2,
+            uint64 r3,
+            uint64 r4,
+            uint64 r5,
+            uint64 r6,
+            uint64 r7
+        ) = val.unpack512();
+
+        assertEq(r0, uint256(0x0000000000000000));
+        assertEq(r1, uint256(0x1111111111111111));
+        assertEq(r2, uint256(0x2222222222222222));
+        assertEq(r3, uint256(0x3333333333333333));
+        assertEq(r4, uint256(0x4444444444444444));
+        assertEq(r5, uint256(0x5555555555555555));
+        assertEq(r6, uint256(0x6666666666666666));
+        assertEq(r7, uint256(0x7777777777777777));
+    }
 }
