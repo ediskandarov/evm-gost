@@ -8,6 +8,109 @@ contract Streebog {
 
     uint constant BLOCK_SIZE = 64;
 
+    enum DigestSize {
+        _256,
+        _512
+    }
+
+    struct Context {
+        bytes buffer;
+        bytes hash;
+        //
+        bytes h;
+        bytes N;
+        bytes Sigma;
+        //
+        uint64 bufSize;
+        DigestSize digestSize;
+    }
+
+    function initContext(DigestSize digestSize) internal pure returns (Context memory) {
+        // only 256bit hash is supported
+        assert(digestSize == DigestSize._256);
+
+        Context memory ctx = Context({
+            buffer: new bytes(BLOCK_SIZE),
+            hash: new bytes(BLOCK_SIZE),
+            h: new bytes(BLOCK_SIZE),
+            N: new bytes(BLOCK_SIZE),
+            Sigma: new bytes(BLOCK_SIZE),
+            bufSize: 0,
+            digestSize: digestSize
+        });
+
+        // In 256bit hashing `h` field is initialized with 0x01
+        ctx.h.initWith01();
+
+        return ctx;
+    }
+
+    function update(
+        Context memory ctx,
+        bytes memory data
+    ) internal pure {
+        uint64 chunkSize = 0;
+        uint64 dataOffset = 0;
+        uint64 len = data.length;
+
+        // this is useful if message has already been updated
+        if (ctx.bufSize > 0) {
+            chunkSize = 64 - ctx.bufSize;
+            if (chunkSize > len) {
+                chunkSize = len;
+            }
+
+            ctx.buffer.copy(data, chunkSize, ctx.bufSize, dataOffset);
+
+            ctx.bufSize += chunkSize;
+            len -= chunkSize;
+            dataOffset += chunkSize;
+
+            if (ctx.bufSize == 64) {
+                stage2(ctx, ctx.buffer, 0);
+                ctx.bufSize = 0;
+            }
+        }
+
+        while (len > 63) {
+            stage2(ctx, data, dataOffset);
+            dataOffset += 64;
+            len -= 64;
+        }
+
+        if (len > 0) {
+            ctx.buffer.copy(data, len, 0, dataOffset);
+            ctx.bufSize = len;
+        }
+    }
+
+    function final_(Context memory ctx) internal pure returns (uint8[] memory) {
+        stage3(ctx);
+
+        ctx.bufSize = 0;
+
+        bytes memory digest;
+
+        if (ctx.digestSize == DigestSize._256) {
+            digest = new bytes(32);
+            digest.copy(ctx.hash, 32, 0, 32);
+        } else {
+            digest = new bytes(64);
+            digest.copy(ctx.hash, 64);
+        }
+
+        return digest;
+    }
+
+    
+
+
+    function hash256_2(bytes calldata message) external pure returns(bytes memory) {
+        Context memory ctx = initContext(DigestSize._256);
+        update(ctx, message);
+        return final_(ctx);
+    }
+
     function hash256(
         bytes calldata message
     ) external pure returns (bytes memory) {
