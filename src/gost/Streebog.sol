@@ -147,7 +147,7 @@ contract Streebog {
         XLPS(h, N, data);
 
         /* Starting E() */
-        Ki = data;
+        Ki.copy(data, Ki.length);
         XLPS(Ki, m, data);
 
         for (uint i = 0; i < 11; i++) {
