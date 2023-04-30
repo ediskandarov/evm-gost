@@ -8,13 +8,21 @@ library Bytes64Lib {
         bytes32 pattern = hex"0101010101010101010101010101010101010101010101010101010101010101";
         assembly {
             let len := mload(dst)
-            for { let offset := 0 } lt(offset, len) { offset := add(offset, 32) } {
+            for {
+                let offset := 0
+            } lt(offset, len) {
+                offset := add(offset, 32)
+            } {
                 mstore(add(add(dst, 32), offset), pattern)
             }
         }
     }
 
-    function replaceAt(bytes memory dst, uint256 offset, bytes8 subValue) internal pure {
+    function replaceAt(
+        bytes memory dst,
+        uint256 offset,
+        bytes8 subValue
+    ) internal pure {
         // there should be enough space to replace
         assert(offset <= dst.length - 8);
 
@@ -33,14 +41,21 @@ library Bytes64Lib {
         }
     }
 
-    function copy(bytes memory dst, bytes memory src, uint256 size) internal pure {
+    function copy(
+        bytes memory dst,
+        bytes memory src,
+        uint256 size
+    ) internal pure {
         copy(dst, src, size, 0, 0);
     }
 
-    function copy(bytes memory dst, bytes memory src, uint256 size, uint256 dstOffset, uint256 srcOffset)
-        internal
-        pure
-    {
+    function copy(
+        bytes memory dst,
+        bytes memory src,
+        uint256 size,
+        uint256 dstOffset,
+        uint256 srcOffset
+    ) internal pure {
         // destination array should have enough space to copy to
         assert(dst.length - dstOffset >= size);
         // source array should have enough bytes to copy from
@@ -49,31 +64,39 @@ library Bytes64Lib {
         assert(dst.length % 32 == 0);
 
         assembly {
-            for { let offset := 0 } lt(offset, size) { offset := add(offset, 32) } {
+            for {
+                let offset := 0
+            } lt(offset, size) {
+                offset := add(offset, 32)
+            } {
                 let remaining := sub(size, offset)
                 let chunk := 0x0
 
                 // if data length to copy is more than or equal 32 bytes
                 switch lt(remaining, 32)
-                case 0 { chunk := mload(add(add(add(src, 32), srcOffset), offset)) }
+                case 0 {
+                    chunk := mload(add(add(add(src, 32), srcOffset), offset))
+                }
                 case 1 {
                     // we should copy a fraction of bytes from src
-                    chunk :=
-                        or(
-                            and(
-                                mload(add(add(add(dst, 32), dstOffset), offset)),
-                                // Move mask right, so that we preserve dst data
-                                shr(mul(8, remaining), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-                            ),
-                            and(
-                                mload(add(add(add(src, 32), srcOffset), offset)),
-                                // Move mask left, so that we truncate redundant source data
-                                shl(
-                                    mul(8, sub(32, remaining)),
-                                    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-                                )
+                    chunk := or(
+                        and(
+                            mload(add(add(add(dst, 32), dstOffset), offset)),
+                            // Move mask right, so that we preserve dst data
+                            shr(
+                                mul(8, remaining),
+                                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+                            )
+                        ),
+                        and(
+                            mload(add(add(add(src, 32), srcOffset), offset)),
+                            // Move mask left, so that we truncate redundant source data
+                            shl(
+                                mul(8, sub(32, remaining)),
+                                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
                             )
                         )
+                    )
                 }
 
                 // Put chunk into destination
@@ -82,7 +105,11 @@ library Bytes64Lib {
         }
     }
 
-    function xor512(bytes memory dst, bytes memory a, bytes memory b) internal pure {
+    function xor512(
+        bytes memory dst,
+        bytes memory a,
+        bytes memory b
+    ) internal pure {
         assert(dst.length == 64);
         assert(a.length == 64);
         assert(b.length == 64);
@@ -96,7 +123,11 @@ library Bytes64Lib {
         }
     }
 
-    function add512(bytes memory dst, bytes memory a, bytes memory b) internal pure {
+    function add512(
+        bytes memory dst,
+        bytes memory a,
+        bytes memory b
+    ) internal pure {
         assert(dst.length == 64);
         assert(a.length == 64);
         assert(b.length == 64);
