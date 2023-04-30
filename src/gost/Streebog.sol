@@ -6,6 +6,10 @@ import "./Bytes64Lib.sol";
 contract Streebog {
     using Bytes64Lib for bytes;
 
+    event log(string);
+    event logs(bytes);
+    event log_uint(uint);
+
     uint constant BLOCK_SIZE = 64;
 
     enum DigestSize {

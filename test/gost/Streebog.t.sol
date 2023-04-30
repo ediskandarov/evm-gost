@@ -20,4 +20,12 @@ contract StreebogTest is Test {
         );
     }
 
+    function test_hash256_2() external {
+        bytes memory hash256 = streebog.hash256_2(bytes("hello world"));
+
+        assertEq(hash256,
+            hex"c600fd9dd049cf8abd2f5b32e840d2cb0e41ea44de1c155dcd88dc84fe58a855"
+        );
+    }
+
 }

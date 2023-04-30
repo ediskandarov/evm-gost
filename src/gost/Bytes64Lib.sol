@@ -42,7 +42,7 @@ library Bytes64Lib {
         pure
     {
         // destination array should have enough space to copy to
-        assert(dst.length - dstOffset >= src.length - srcOffset);
+        assert(dst.length - dstOffset >= size);
         // source array should have enough bytes to copy from
         assert(src.length - srcOffset >= size);
         // destination array length should be divisable by 32
