@@ -48,7 +48,20 @@ contract TestBytes64LibTest is Test {
         bytes memory value = new bytes(64);
         value.initWith01();
 
-        value.replaceAt(1, bytes8(0x1234567890abcdef));
+        value.replaceAt(1, uint64(0x1234567890abcdef));
+
+        assertEq(
+            value,
+            hex"011234567890abcdef0101010101010101010101010101010101010101010101"
+            hex"0101010101010101010101010101010101010101010101010101010101010101"
+        );
+    }
+
+    function test_replaceBytes8AtIndex() external {
+        bytes memory value = new bytes(64);
+        value.initWith01();
+
+        value.replaceAt(1, bytes8(hex"1234567890abcdef"));
 
         assertEq(
             value,

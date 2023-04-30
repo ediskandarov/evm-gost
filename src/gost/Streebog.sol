@@ -199,7 +199,7 @@ contract Streebog {
             tmpData ^= Ax[6][(r6 >> (i << 3)) & 0xFF];
             tmpData ^= Ax[7][(r7 >> (i << 3)) & 0xFF];
 
-            data.replaceAt(i * 8, bytes8(tmpData));
+            data.replaceAt(i * 8, tmpData);
         }
     }
 

@@ -20,22 +20,59 @@ library Bytes64Lib {
 
     function replaceAt(
         bytes memory dst,
-        uint256 offset,
+        uint256 index,
         bytes8 subValue
     ) internal pure {
+        // @todo there may be memory corruption
         // there should be enough space to replace
-        assert(offset <= dst.length - 8);
+        assert(index <= dst.length - 8);
 
         assembly {
+            // note: first 32 bytes contain the array length
+            let offset := add(add(dst, index), 8)
+
             mstore(
-                // note: first 32 bytes contain the array length
-                add(add(dst, 32), offset),
+                offset,
                 or(
+                    // preserve left part of the value
                     and(
-                        mload(add(add(dst, 32), offset)),
-                        0x0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffff
+                        mload(offset),
+                        0xffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000
                     ),
-                    subValue
+                    and(
+                        shr(192, subValue),
+                        0x000000000000000000000000000000000000000000000000ffffffffffffffff
+                    )
+                )
+            )
+        }
+    }
+
+    function replaceAt(
+        bytes memory dst,
+        uint256 index,
+        uint64 subValue
+    ) internal pure {
+        // @todo there may be memory corruption
+        // there should be enough space to replace
+        assert(index <= dst.length - 8);
+
+        assembly {
+            // note: first 32 bytes contain the array length
+            let offset := add(add(dst, index), 8)
+
+            mstore(
+                offset,
+                or(
+                    // preserve left part of the value
+                    and(
+                        mload(offset),
+                        0xffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000
+                    ),
+                    and(
+                        subValue,
+                        0x000000000000000000000000000000000000000000000000ffffffffffffffff
+                    )
                 )
             )
         }
