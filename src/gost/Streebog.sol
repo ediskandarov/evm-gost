@@ -201,22 +201,17 @@ contract Streebog {
             uint64 r7
         ) = tmp.unpack512();
 
-        uint64[256][8] memory Ax = getAx();
+        for (int i = 7; i >= 0; i--) {
+            uint64 tmpData = Ax[0][(r0 >> (uint(i) << 3)) & 0xFF];
+            tmpData ^= Ax[1][(r1 >> (uint(i) << 3)) & 0xFF];
+            tmpData ^= Ax[2][(r2 >> (uint(i) << 3)) & 0xFF];
+            tmpData ^= Ax[3][(r3 >> (uint(i) << 3)) & 0xFF];
+            tmpData ^= Ax[4][(r4 >> (uint(i) << 3)) & 0xFF];
+            tmpData ^= Ax[5][(r5 >> (uint(i) << 3)) & 0xFF];
+            tmpData ^= Ax[6][(r6 >> (uint(i) << 3)) & 0xFF];
+            tmpData ^= Ax[7][(r7 >> (uint(i) << 3)) & 0xFF];
 
-        for (uint i = 7; i >= 0; i--) {
-            uint64 tmpData = Ax[0][(r0 >> (i << 3)) & 0xFF];
-            tmpData ^= Ax[1][(r1 >> (i << 3)) & 0xFF];
-            tmpData ^= Ax[2][(r2 >> (i << 3)) & 0xFF];
-            tmpData ^= Ax[3][(r3 >> (i << 3)) & 0xFF];
-            tmpData ^= Ax[4][(r4 >> (i << 3)) & 0xFF];
-            tmpData ^= Ax[5][(r5 >> (i << 3)) & 0xFF];
-            tmpData ^= Ax[6][(r6 >> (i << 3)) & 0xFF];
-            tmpData ^= Ax[7][(r7 >> (i << 3)) & 0xFF];
-
-            data.replaceAt((7 - i) * 8, tmpData);
-
-            // a workaround for arithmetic overflow
-            if (i == 0) break;
+            data.replaceAt((7 - uint(i)) * 8, tmpData);
         }
     }
 
