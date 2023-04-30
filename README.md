@@ -14,4 +14,4 @@ $ forge test
 
 ## Gas usage analysis
 
-The algorithm uses approximately 28 000 000 gas to calculate hash on `hello world` message.
+The algorithm uses approximately 1 300 000 gas to calculate hash on `hello world` message.
