@@ -21,7 +21,7 @@ contract Streebog {
         bytes N;
         bytes Sigma;
         //
-        uint64 bufSize;
+        uint bufSize;
         DigestSize digestSize;
     }
 
@@ -49,9 +49,9 @@ contract Streebog {
         Context memory ctx,
         bytes memory data
     ) internal pure {
-        uint64 chunkSize = 0;
-        uint64 dataOffset = 0;
-        uint64 len = data.length;
+        uint chunkSize = 0;
+        uint dataOffset = 0;
+        uint len = data.length;
 
         // this is useful if message has already been updated
         if (ctx.bufSize > 0) {
@@ -84,7 +84,7 @@ contract Streebog {
         }
     }
 
-    function final_(Context memory ctx) internal pure returns (uint8[] memory) {
+    function final_(Context memory ctx) internal pure returns (bytes memory) {
         stage3(ctx);
 
         ctx.bufSize = 0;
@@ -102,7 +102,79 @@ contract Streebog {
         return digest;
     }
 
-    
+        function stage2(
+        Context memory ctx,
+        bytes memory data,
+        uint dataOffset
+    ) internal pure {
+        bytes memory m = new bytes(BLOCK_SIZE);
+        m.copy(data, m.length, 0 ,dataOffset);
+
+        g(ctx.h, ctx.N, m);
+
+        ctx.N.add512(ctx.N, getBuffer512());
+        ctx.Sigma.add512(ctx.Sigma, m);
+    }
+
+
+    function stage3(Context memory ctx) internal pure {
+        bytes memory buf = new bytes(64);
+
+        // @todo double check __GOST3411_BIG_ENDIAN__
+        buf[0] = bytes1(uint8(ctx.bufSize << 3));
+
+        pad(ctx);
+
+        g(ctx.h, ctx.N, ctx.buffer);
+
+        ctx.N.add512(ctx.N, buf);
+        ctx.Sigma.add512(ctx.Sigma, ctx.buffer);
+
+        bytes memory buffer0 = getBuffer0();
+        g(ctx.h, buffer0, ctx.N);
+
+        g(ctx.h, buffer0, ctx.Sigma);
+
+        ctx.hash.copy(ctx.h, BLOCK_SIZE);
+    }
+
+    function g(bytes memory h, bytes memory N, bytes memory m) internal pure {
+        bytes memory data = new bytes(BLOCK_SIZE);
+        bytes memory Ki = new bytes(BLOCK_SIZE);
+
+        Ki.xor512(N, h);
+
+        S(Ki);
+        P(Ki);
+        L(Ki);
+
+        E(Ki, m, data);
+
+        data.xor512(data, h);
+        h.xor512(data, m);
+    }
+
+    function pad(Context memory ctx) internal pure {
+        if (ctx.bufSize > 63) return;
+
+        ctx.buffer.copy(getBuffer0(), ctx.buffer.length - ctx.bufSize, ctx.bufSize, 0);
+
+        ctx.buffer[ctx.bufSize] = 0x01;
+    }
+
+    function getBuffer512() internal pure returns (bytes memory) {
+        return (
+            hex"0002000000000000000000000000000000000000000000000000000000000000"
+            hex"0000000000000000000000000000000000000000000000000000000000000000"
+        );
+    }
+
+    function getBuffer0() internal pure returns (bytes memory) {
+        return  (
+            hex"0000000000000000000000000000000000000000000000000000000000000000"
+            hex"0000000000000000000000000000000000000000000000000000000000000000"
+        );
+    }
 
 
     function hash256_2(bytes calldata message) external pure returns(bytes memory) {
