@@ -88,17 +88,33 @@ library Bytes64Lib {
         assert(b.length == 64);
 
         assembly {
-            // xor first 32 bytes
+            // xor higher 32 bytes
             mstore(add(dst, 32), xor(mload(add(a, 32)), mload(add(b, 32))))
 
-            // xor remaining 32 bytes
+            // xor lower 32 bytes
             mstore(add(dst, 64), xor(mload(add(a, 64)), mload(add(b, 64))))
         }
     }
 
-    function addmod512(bytes memory dst, bytes memory a, bytes memory b) internal pure {
+    function add512(bytes memory dst, bytes memory a, bytes memory b) internal pure {
         assert(dst.length == 64);
         assert(a.length == 64);
         assert(b.length == 64);
+
+        assembly {
+            // add lower bits of the number
+            let loA := mload(add(a, 64))
+            let loB := mload(add(b, 64))
+            let loR := add(loA, loB) // lower result
+
+            let hiA := mload(add(a, 32))
+            let hiB := mload(add(b, 32))
+
+            // add higher bits of the number
+            let hiR := add(add(hiA, hiB), lt(loR, loA))
+
+            mstore(add(dst, 64), loR)
+            mstore(add(dst, 32), hiR)
+        }
     }
 }
