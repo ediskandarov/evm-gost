@@ -27,6 +27,8 @@ contract Streebog {
         //
         uint bufSize;
         DigestSize digestSize;
+        // An optimization to avoid memory allocations
+        uint64[256][8] Ax;
     }
 
     function initContext(
@@ -42,7 +44,8 @@ contract Streebog {
             N: new bytes(BLOCK_SIZE),
             Sigma: new bytes(BLOCK_SIZE),
             bufSize: 0,
-            digestSize: digestSize
+            digestSize: digestSize,
+            Ax: getAx()
         });
 
         // In 256bit hashing `h` field is initialized with 0x01
@@ -113,7 +116,7 @@ contract Streebog {
         bytes memory m = new bytes(BLOCK_SIZE);
         m.copy(data, m.length, 0, dataOffset);
 
-        g(ctx.h, ctx.N, m);
+        g(ctx.h, ctx.N, m, ctx.Ax);
 
         ctx.N.add512(ctx.N, getBuffer512());
         ctx.Sigma.add512(ctx.Sigma, m);
@@ -127,35 +130,40 @@ contract Streebog {
 
         pad(ctx);
 
-        g(ctx.h, ctx.N, ctx.buffer);
+        g(ctx.h, ctx.N, ctx.buffer, ctx.Ax);
 
         ctx.N.add512(ctx.N, buf);
         ctx.Sigma.add512(ctx.Sigma, ctx.buffer);
 
         bytes memory buffer0 = getBuffer0();
-        g(ctx.h, buffer0, ctx.N);
+        g(ctx.h, buffer0, ctx.N, ctx.Ax);
 
-        g(ctx.h, buffer0, ctx.Sigma);
+        g(ctx.h, buffer0, ctx.Sigma, ctx.Ax);
 
         ctx.hash.copy(ctx.h, BLOCK_SIZE);
     }
 
-    function g(bytes memory h, bytes memory N, bytes memory m) internal pure {
+    function g(
+        bytes memory h,
+        bytes memory N,
+        bytes memory m,
+        uint64[256][8] memory Ax
+    ) internal pure {
         bytes memory data = new bytes(BLOCK_SIZE);
         bytes memory Ki = new bytes(BLOCK_SIZE);
 
-        XLPS(h, N, data);
+        XLPS(h, N, data, Ax);
 
         /* Starting E() */
         Ki.copy(data, Ki.length);
-        XLPS(Ki, m, data);
+        XLPS(Ki, m, data, Ax);
 
         for (uint i = 0; i < 11; i++) {
-            ROUND(i, Ki, data);
+            ROUND(i, Ki, data, Ax);
         }
 
         bytes memory C = getC(11);
-        XLPS(Ki, C, Ki);
+        XLPS(Ki, C, Ki, Ax);
         data.xor512(Ki, data);
         /* E() done */
 
@@ -163,16 +171,22 @@ contract Streebog {
         h.xor512(data, m);
     }
 
-    function ROUND(uint i, bytes memory Ki, bytes memory data) internal pure {
+    function ROUND(
+        uint i,
+        bytes memory Ki,
+        bytes memory data,
+        uint64[256][8] memory Ax
+    ) internal pure {
         bytes memory C = getC(i);
-        XLPS(Ki, C, Ki);
-        XLPS(Ki, data, data);
+        XLPS(Ki, C, Ki, Ax);
+        XLPS(Ki, data, data, Ax);
     }
 
     function XLPS(
         bytes memory x,
         bytes memory y,
-        bytes memory data
+        bytes memory data,
+        uint64[256][8] memory Ax
     ) internal pure {
         bytes memory tmp = new bytes(64);
         tmp.xor512(x, y);
@@ -189,7 +203,7 @@ contract Streebog {
 
         uint64[256][8] memory Ax = getAx();
 
-        for (uint i = 0; i <= 7; i++) {
+        for (uint i = 7; i >= 0; i--) {
             uint64 tmpData = Ax[0][(r0 >> (i << 3)) & 0xFF];
             tmpData ^= Ax[1][(r1 >> (i << 3)) & 0xFF];
             tmpData ^= Ax[2][(r2 >> (i << 3)) & 0xFF];
@@ -199,7 +213,10 @@ contract Streebog {
             tmpData ^= Ax[6][(r6 >> (i << 3)) & 0xFF];
             tmpData ^= Ax[7][(r7 >> (i << 3)) & 0xFF];
 
-            data.replaceAt(i * 8, tmpData);
+            data.replaceAt((7 - i) * 8, tmpData);
+
+            // a workaround for arithmetic overflow
+            if (i == 0) break;
         }
     }
 
