@@ -181,91 +181,10 @@ contract Streebog {
     }
 
 
-    function hash256_2(bytes calldata message) external pure returns(bytes memory) {
+    function hash256(bytes calldata message) external pure returns(bytes memory) {
         Context memory ctx = initContext(DigestSize._256);
         update(ctx, message);
         return final_(ctx);
-    }
-
-    function hash256(
-        bytes calldata message
-    ) external pure returns (bytes memory) {
-        bytes memory IV = new bytes(BLOCK_SIZE);
-
-        IV.initWith01();
-
-        bytes memory out = new bytes(32);
-        out.copy(hash_X(IV, message), 32, 0, 32);
-        return out;
-    }
-
-    function hash_X(
-        bytes memory IV,
-        bytes memory message
-    ) internal pure returns (bytes memory) {
-        (
-            bytes memory v512,
-            bytes memory v0,
-            bytes memory Sigma,
-            bytes memory N
-        ) = getContext();
-        bytes memory m = new bytes(BLOCK_SIZE);
-        bytes memory hash = IV;
-
-        uint len = message.length;
-
-        // Stage 2
-        while (len >= 512) {
-            m.copy(message, 64, 0, len / 8 - 63 - ((len & 0x7) == 0 ? 1 : 0));
-
-            g_N(N, hash, m);
-            N.add512(N, v512);
-            Sigma.add512(Sigma, m);
-            len -= 512;
-        }
-
-        for (uint i = 0; i < BLOCK_SIZE; i++) {
-            m[i] = 0x00;
-        }
-
-        for (uint i = 0; i < len / 8 + 1 - ((len & 0x7) == 0 ? 1 : 0); i++) {
-            uint copyOffset = 63 - len / 8 + ((len & 0x7) == 0 ? 1 : 0);
-            m[copyOffset + i] = bytes1(uint8(message[i]));
-        }
-
-        // Stage 3
-        m[63 - len / 8] |= bytes1(uint8((1 << (len & 0x7))));
-
-        g_N(N, hash, m);
-        v512[63] = bytes1(uint8(len & 0xFF));
-        v512[62] = bytes1(uint8(len >> 8));
-        N.add512(N, v512);
-
-        Sigma.add512(Sigma, m);
-
-        g_N(v0, hash, N);
-        g_N(v0, hash, Sigma);
-
-        bytes memory out = new bytes(BLOCK_SIZE);
-        out.copy(hash, BLOCK_SIZE);
-
-        return out;
-    }
-
-    function g_N(bytes memory N, bytes memory h, bytes memory m) internal pure {
-        bytes memory t = new bytes(BLOCK_SIZE);
-        bytes memory K = new bytes(BLOCK_SIZE);
-
-        K.xor512(N, h);
-
-        S(K);
-        P(K);
-        L(K);
-
-        E(K, m, t);
-
-        t.xor512(t, h);
-        h.xor512(t, m);
     }
 
     function E(
@@ -376,7 +295,8 @@ contract Streebog {
     function S(bytes memory vect) internal pure {
         // Substitution for SubBytes function
         // prettier-ignore
-        bytes memory sbox = hex"fc_ee_dd_11_cf_6e_31_16_fb_c4_fa_da_23_c5_04_4d"
+        bytes memory sbox = (
+            hex"fc_ee_dd_11_cf_6e_31_16_fb_c4_fa_da_23_c5_04_4d"
             hex"e9_77_f0_db_93_2e_99_ba_17_36_f1_bb_14_cd_5f_c1"
             hex"f9_18_65_5a_e2_5c_ef_21_81_1c_3c_42_8b_01_8e_4f"
             hex"05_84_02_ae_e3_6a_8f_a0_06_0b_ed_98_7f_d4_d3_1f"
@@ -392,7 +312,7 @@ contract Streebog {
             hex"e1_1b_83_49_4c_3f_f8_fe_8d_53_aa_90_ca_d8_85_61"
             hex"20_71_67_a4_2d_2b_09_5b_cb_9b_25_d0_be_e5_6c_52"
             hex"59_a6_74_d2_e6_f4_b4_c0_d1_66_af_c2_39_4b_63_b6"
-            ;
+        );
 
         for (uint i = 0; i < BLOCK_SIZE; i++) {
             vect[i] = sbox[uint8(vect[i])];
