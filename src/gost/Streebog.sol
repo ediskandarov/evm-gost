@@ -29,7 +29,9 @@ contract Streebog {
         DigestSize digestSize;
     }
 
-    function initContext(DigestSize digestSize) internal pure returns (Context memory) {
+    function initContext(
+        DigestSize digestSize
+    ) internal pure returns (Context memory) {
         // only 256bit hash is supported
         assert(digestSize == DigestSize._256);
 
@@ -49,10 +51,7 @@ contract Streebog {
         return ctx;
     }
 
-    function update(
-        Context memory ctx,
-        bytes memory data
-    ) internal pure {
+    function update(Context memory ctx, bytes memory data) internal pure {
         uint chunkSize = 0;
         uint dataOffset = 0;
         uint len = data.length;
@@ -106,20 +105,19 @@ contract Streebog {
         return digest;
     }
 
-        function stage2(
+    function stage2(
         Context memory ctx,
         bytes memory data,
         uint dataOffset
     ) internal pure {
         bytes memory m = new bytes(BLOCK_SIZE);
-        m.copy(data, m.length, 0 ,dataOffset);
+        m.copy(data, m.length, 0, dataOffset);
 
         g(ctx.h, ctx.N, m);
 
         ctx.N.add512(ctx.N, getBuffer512());
         ctx.Sigma.add512(ctx.Sigma, m);
     }
-
 
     function stage3(Context memory ctx) internal pure {
         bytes memory buf = new bytes(64);
@@ -161,7 +159,12 @@ contract Streebog {
     function pad(Context memory ctx) internal pure {
         if (ctx.bufSize > 63) return;
 
-        ctx.buffer.copy(getBuffer0(), ctx.buffer.length - ctx.bufSize, ctx.bufSize, 0);
+        ctx.buffer.copy(
+            getBuffer0(),
+            ctx.buffer.length - ctx.bufSize,
+            ctx.bufSize,
+            0
+        );
 
         ctx.buffer[ctx.bufSize] = 0x01;
     }
@@ -174,14 +177,15 @@ contract Streebog {
     }
 
     function getBuffer0() internal pure returns (bytes memory) {
-        return  (
+        return (
             hex"0000000000000000000000000000000000000000000000000000000000000000"
             hex"0000000000000000000000000000000000000000000000000000000000000000"
         );
     }
 
-
-    function hash256(bytes calldata message) external pure returns(bytes memory) {
+    function hash256(
+        bytes calldata message
+    ) external pure returns (bytes memory) {
         Context memory ctx = initContext(DigestSize._256);
         update(ctx, message);
         return final_(ctx);
@@ -346,82 +350,84 @@ contract Streebog {
                 hex"4b7ce09192676901a2422a08a460d315"
                 hex"05767436cc744d23dd806559f2a64507"
             );
-        } else if ( i ==1 ) {
-
-            C= bytes(
+        } else if (i == 1) {
+            C = bytes(
                 hex"6fa3b58aa99d2f1a4fe39d460f70b5d7"
                 hex"f3feea720a232b9861d55e0f16b50131"
                 hex"9ab5176b12d699585cb561c2db0aa7ca"
                 hex"55dda21bd7cbcd56e679047021b19bb7"
             );
-        }
-            else if (i == 2) {
-
-            C= bytes(
+        } else if (i == 2) {
+            C = bytes(
                 hex"f574dcac2bce2fc70a39fc286a3d8435"
                 hex"06f15e5f529c1f8bf2ea7514b1297b7b"
                 hex"d3e20fe490359eb1c1c93a376062db09"
                 hex"c2b6f443867adb31991e96f50aba0ab2"
             );
-            }
-             else if (i==3) {
-
-            C= bytes(
+        } else if (i == 3) {
+            C = bytes(
                 hex"ef1fdfb3e81566d2f948e1a05d71e4dd"
                 hex"488e857e335c3c7d9d721cad685e353f"
                 hex"a9d72c82ed03d675d8b71333935203be"
                 hex"3453eaa193e837f1220cbebc84e3d12e"
             );
-             }
-             else if (i == 4)
-            C= bytes(
+        } else if (i == 4) {
+            C = bytes(
                 hex"4bea6bacad4747999a3f410c6ca92363"
                 hex"7f151c1f1686104a359e35d7800fffbd"
                 hex"bfcd1747253af5a3dfff00b723271a16"
                 hex"7a56a27ea9ea63f5601758fd7c6cfe57"
-            ); else if (i==5)
-            C= bytes(
+            );
+        } else if (i == 5) {
+            C = bytes(
                 hex"ae4faeae1d3ad3d96fa4c33b7a3039c0"
                 hex"2d66c4f95142a46c187f9ab49af08ec6"
                 hex"cffaa6b71c9ab7b40af21f66c2bec6b6"
                 hex"bf71c57236904f35fa68407a46647d6e"
-            ); else if (i==6)
-            C= bytes(
+            );
+        } else if (i == 6) {
+            C = bytes(
                 hex"f4c70e16eeaac5ec51ac86febf240954"
                 hex"399ec6c7e6bf87c9d3473e33197a93c9"
                 hex"0992abc52d822c3706476983284a0504"
                 hex"3517454ca23c4af38886564d3a14d493"
-            ); else if ( i ==7)
-            C= bytes(
+            );
+        } else if (i == 7) {
+            C = bytes(
                 hex"9b1f5b424d93c9a703e7aa020c6e4141"
                 hex"4eb7f8719c36de1e89b4443b4ddbc49a"
                 hex"f4892bcb929b069069d18d2bd1a5c42f"
                 hex"36acc2355951a8d9a47f0dd4bf02e71e"
-            ); else if (i == 8)
-            C= bytes(
+            );
+        } else if (i == 8) {
+            C = bytes(
                 hex"378f5a541631229b944c9ad8ec165fde"
                 hex"3a7d3a1b258942243cd955b7e00d0984"
                 hex"800a440bdbb2ceb17b2b8a9aa6079c54"
                 hex"0e38dc92cb1f2a607261445183235adb"
-            ); else if (i==9)
-            C= bytes(
+            );
+        } else if (i == 9) {
+            C = bytes(
                 hex"abbedea680056f52382ae548b2e4f3f3"
                 hex"8941e71cff8a78db1fffe18a1b336103"
                 hex"9fe76702af69334b7a1e6c303b7652f4"
                 hex"3698fad1153bb6c374b4c7fb98459ced"
-            ); else if (i==10)
-            C=  bytes(
+            );
+        } else if (i == 10) {
+            C = bytes(
                 hex"7bcd9ed0efc889fb3002c6cd635afe94"
                 hex"d8fa6bbbebab07612001802114846679"
                 hex"8a1d71efea48b9caefbacd1d7d476e98"
                 hex"dea2594ac06fd85d6bcaa4cd81f32d1b"
-            ); else if (i==11)
-            C= bytes(
+            );
+        } else if (i == 11) {
+            C = bytes(
                 hex"378ee767f11631bad21380b00449b17a"
                 hex"cda43c32bcdf1d77f82012d430219f9b"
                 hex"5d80ef9d1891cc86e71da4aa88e12852"
                 hex"faf417d5d9b21b9948bc924af11bd720"
             );
+        }
 
         return C;
     }
