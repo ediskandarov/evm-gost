@@ -204,6 +204,7 @@ contract Streebog {
             uint64 r7
         ) = tmp.unpack512();
 
+        // @todo an opportunity for performance(gas usage) optimization
         for (int i = 7; i >= 0; i--) {
             uint64 tmpData = Ax[0][(r0 >> (uint(i) << 3)) & 0xFF];
             tmpData ^= Ax[1][(r1 >> (uint(i) << 3)) & 0xFF];

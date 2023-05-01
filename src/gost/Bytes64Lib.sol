@@ -206,6 +206,7 @@ library Bytes64Lib {
         bytes memory b
     ) internal pure {
         // we can switch implementation here
+        // @note: tests do not pass on add512BE implementation
         add512LE(dst, a, b);
     }
 
