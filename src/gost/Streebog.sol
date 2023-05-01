@@ -231,17 +231,19 @@ contract Streebog {
     }
 
     function getBuffer512() internal pure returns (bytes memory) {
-        return (
-            hex"0002000000000000000000000000000000000000000000000000000000000000"
-            hex"0000000000000000000000000000000000000000000000000000000000000000"
-        );
+        return
+            bytes(
+                hex"0002000000000000000000000000000000000000000000000000000000000000"
+                hex"0000000000000000000000000000000000000000000000000000000000000000"
+            );
     }
 
     function getBuffer0() internal pure returns (bytes memory) {
-        return (
-            hex"0000000000000000000000000000000000000000000000000000000000000000"
-            hex"0000000000000000000000000000000000000000000000000000000000000000"
-        );
+        return
+            bytes(
+                hex"0000000000000000000000000000000000000000000000000000000000000000"
+                hex"0000000000000000000000000000000000000000000000000000000000000000"
+            );
     }
 
     function hash256(
@@ -257,76 +259,124 @@ contract Streebog {
 
         bytes[12] memory C = [
             bytes(
-                hex"b1085bda1ecadae9ebcb2f81c0657c1f"
-                hex"2f6a76432e45d016714eb88d7585c4fc"
-                hex"4b7ce09192676901a2422a08a460d315"
-                hex"05767436cc744d23dd806559f2a64507"
+                hex"0745a6f2596580dd"
+                hex"234d74cc36747605"
+                hex"15d360a4082a42a2"
+                hex"0169679291e07c4b"
+                hex"fcc485758db84e71"
+                hex"16d0452e43766a2f"
+                hex"1f7c65c0812fcbeb"
+                hex"e9daca1eda5b08b1"
             ),
             bytes(
-                hex"6fa3b58aa99d2f1a4fe39d460f70b5d7"
-                hex"f3feea720a232b9861d55e0f16b50131"
-                hex"9ab5176b12d699585cb561c2db0aa7ca"
-                hex"55dda21bd7cbcd56e679047021b19bb7"
+                hex"b79bb121700479e6"
+                hex"56cdcbd71ba2dd55"
+                hex"caa70adbc261b55c"
+                hex"5899d6126b17b59a"
+                hex"3101b5160f5ed561"
+                hex"982b230a72eafef3"
+                hex"d7b5700f469de34f"
+                hex"1a2f9da98ab5a36f"
             ),
             bytes(
-                hex"f574dcac2bce2fc70a39fc286a3d8435"
-                hex"06f15e5f529c1f8bf2ea7514b1297b7b"
-                hex"d3e20fe490359eb1c1c93a376062db09"
-                hex"c2b6f443867adb31991e96f50aba0ab2"
+                hex"b20aba0af5961e99"
+                hex"31db7a8643f4b6c2"
+                hex"09db6260373ac9c1"
+                hex"b19e3590e40fe2d3"
+                hex"7b7b29b11475eaf2"
+                hex"8b1f9c525f5ef106"
+                hex"35843d6a28fc390a"
+                hex"c72fce2bacdc74f5"
             ),
             bytes(
-                hex"ef1fdfb3e81566d2f948e1a05d71e4dd"
-                hex"488e857e335c3c7d9d721cad685e353f"
-                hex"a9d72c82ed03d675d8b71333935203be"
-                hex"3453eaa193e837f1220cbebc84e3d12e"
+                hex"2ed1e384bcbe0c22"
+                hex"f137e893a1ea5334"
+                hex"be0352933313b7d8"
+                hex"75d603ed822cd7a9"
+                hex"3f355e68ad1c729d"
+                hex"7d3c5c337e858e48"
+                hex"dde4715da0e148f9"
+                hex"d26615e8b3df1fef"
             ),
             bytes(
-                hex"4bea6bacad4747999a3f410c6ca92363"
-                hex"7f151c1f1686104a359e35d7800fffbd"
-                hex"bfcd1747253af5a3dfff00b723271a16"
-                hex"7a56a27ea9ea63f5601758fd7c6cfe57"
+                hex"57fe6c7cfd581760"
+                hex"f563eaa97ea2567a"
+                hex"161a2723b700ffdf"
+                hex"a3f53a254717cdbf"
+                hex"bdff0f80d7359e35"
+                hex"4a1086161f1c157f"
+                hex"6323a96c0c413f9a"
+                hex"994747adac6bea4b"
+            ),
+            (
+                hex"6e7d64467a4068fa"
+                hex"354f903672c571bf"
+                hex"b6c6bec2661ff20a"
+                hex"b4b79a1cb7a6facf"
+                hex"c68ef09ab49a7f18"
+                hex"6ca44251f9c4662d"
+                hex"c039307a3bc3a46f"
+                hex"d9d33a1daeae4fae"
             ),
             bytes(
-                hex"ae4faeae1d3ad3d96fa4c33b7a3039c0"
-                hex"2d66c4f95142a46c187f9ab49af08ec6"
-                hex"cffaa6b71c9ab7b40af21f66c2bec6b6"
-                hex"bf71c57236904f35fa68407a46647d6e"
+                hex"93d4143a4d568688"
+                hex"f34a3ca24c451735"
+                hex"04054a2883694706"
+                hex"372c822dc5ab9209"
+                hex"c9937a19333e47d3"
+                hex"c987bfe6c7c69e39"
+                hex"540924bffe86ac51"
+                hex"ecc5aaee160ec7f4"
             ),
             bytes(
-                hex"f4c70e16eeaac5ec51ac86febf240954"
-                hex"399ec6c7e6bf87c9d3473e33197a93c9"
-                hex"0992abc52d822c3706476983284a0504"
-                hex"3517454ca23c4af38886564d3a14d493"
+                hex"1ee702bfd40d7fa4"
+                hex"d9a8515935c2ac36"
+                hex"2fc4a5d12b8dd169"
+                hex"90069b92cb2b89f4"
+                hex"9ac4db4d3b44b489"
+                hex"1ede369c71f8b74e"
+                hex"41416e0c02aae703"
+                hex"a7c9934d425b1f9b"
             ),
             bytes(
-                hex"9b1f5b424d93c9a703e7aa020c6e4141"
-                hex"4eb7f8719c36de1e89b4443b4ddbc49a"
-                hex"f4892bcb929b069069d18d2bd1a5c42f"
-                hex"36acc2355951a8d9a47f0dd4bf02e71e"
+                hex"db5a238351446172"
+                hex"602a1fcb92dc380e"
+                hex"549c07a69a8a2b7b"
+                hex"b1ceb2db0b440a80"
+                hex"84090de0b755d93c"
+                hex"244289251b3a7d3a"
+                hex"de5f16ecd89a4c94"
+                hex"9b223116545a8f37"
             ),
             bytes(
-                hex"378f5a541631229b944c9ad8ec165fde"
-                hex"3a7d3a1b258942243cd955b7e00d0984"
-                hex"800a440bdbb2ceb17b2b8a9aa6079c54"
-                hex"0e38dc92cb1f2a607261445183235adb"
+                hex"ed9c4598fbc7b474"
+                hex"c3b63b15d1fa9836"
+                hex"f452763b306c1e7a"
+                hex"4b3369af0267e79f"
+                hex"0361331b8ae1ff1f"
+                hex"db788aff1ce74189"
+                hex"f3f3e4b248e52a38"
+                hex"526f0580a6debeab"
             ),
             bytes(
-                hex"abbedea680056f52382ae548b2e4f3f3"
-                hex"8941e71cff8a78db1fffe18a1b336103"
-                hex"9fe76702af69334b7a1e6c303b7652f4"
-                hex"3698fad1153bb6c374b4c7fb98459ced"
+                hex"1b2df381cda4ca6b"
+                hex"5dd86fc04a59a2de"
+                hex"986e477d1dcdbaef"
+                hex"cab948eaef711d8a"
+                hex"7966841421800120"
+                hex"6107abebbb6bfad8"
+                hex"94fe5a63cdc60230"
+                hex"fb89c8efd09ecd7b"
             ),
             bytes(
-                hex"7bcd9ed0efc889fb3002c6cd635afe94"
-                hex"d8fa6bbbebab07612001802114846679"
-                hex"8a1d71efea48b9caefbacd1d7d476e98"
-                hex"dea2594ac06fd85d6bcaa4cd81f32d1b"
-            ),
-            bytes(
-                hex"378ee767f11631bad21380b00449b17a"
-                hex"cda43c32bcdf1d77f82012d430219f9b"
-                hex"5d80ef9d1891cc86e71da4aa88e12852"
-                hex"faf417d5d9b21b9948bc924af11bd720"
+                hex"20d71bf14a92bc48"
+                hex"991bb2d9d517f4fa"
+                hex"5228e188aaa41de7"
+                hex"86cc91189def805d"
+                hex"9b9f2130d41220f8"
+                hex"771ddfbc323ca4cd"
+                hex"7ab14904b08013d2"
+                hex"ba3116f167e78e37"
             )
         ];
 
