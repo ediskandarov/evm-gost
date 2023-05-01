@@ -1,6 +1,11 @@
 # GOST 34.11-2012 hashing algorithm Solidity implementation
 
-Warning. Not useful for production.
+GOST 34.11-2012(aka Streebog) hashing algorithm implementation in Solidity.
+
+## Credits
+
+The library is based on [Alexey Degtyarev](https://github.com/adegtyarev)
+[streebog](https://github.com/adegtyarev/streebog) implementation.
 
 ## Testing
 
