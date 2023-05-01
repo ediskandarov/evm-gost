@@ -205,6 +205,18 @@ library Bytes64Lib {
         bytes memory a,
         bytes memory b
     ) internal pure {
+        // we can switch implementation here
+        add512LE(dst, a, b);
+    }
+
+    /**
+     * Add 512-bit big endian numbers
+     */
+    function add512BE(
+        bytes memory dst,
+        bytes memory a,
+        bytes memory b
+    ) internal pure {
         assert(dst.length == 64);
         assert(a.length == 64);
         assert(b.length == 64);
@@ -223,6 +235,26 @@ library Bytes64Lib {
 
             mstore(add(dst, 64), loR)
             mstore(add(dst, 32), hiR)
+        }
+    }
+
+    /**
+     * Add 512-bit big endian numbers
+     */
+    function add512LE(
+        bytes memory dst,
+        bytes memory a,
+        bytes memory b
+    ) internal pure {
+        assert(dst.length == 64);
+        assert(a.length == 64);
+        assert(b.length == 64);
+
+        // @todo an opportunity for performance(gas usage) optimization
+        uint buf = 0;
+        for (uint i = 0; i < 64; i++) {
+            buf = uint(uint8(a[i])) + uint(uint8(b[i])) + (buf >> 8);
+            dst[i] = bytes1(uint8(buf & 0xFF));
         }
     }
 }
