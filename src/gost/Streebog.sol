@@ -2,9 +2,11 @@
 pragma solidity 0.8.19;
 
 import "./Bytes64Lib.sol";
+import "./uintGostUtils.sol";
 
 contract Streebog {
     using Bytes64Lib for bytes;
+    using uintGostUtils for uint;
 
     event log(string);
     event logs(bytes);
@@ -127,8 +129,7 @@ contract Streebog {
     function stage3(Context memory ctx) internal pure {
         bytes memory buf = new bytes(64);
 
-        // @todo double check __GOST3411_BIG_ENDIAN__
-        buf[0] = bytes1(uint8(ctx.bufSize << 3));
+        buf.replaceAt(0, (ctx.bufSize << 3).bswap64());
 
         pad(ctx);
 
