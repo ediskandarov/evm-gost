@@ -252,22 +252,6 @@ contract Streebog {
         return final_(ctx);
     }
 
-    function getContext()
-        internal
-        pure
-        returns (bytes memory, bytes memory, bytes memory, bytes memory)
-    {
-        // Dynamic bytes arrays are zero initialized by default
-        bytes memory v512 = new bytes(BLOCK_SIZE);
-        // @todo clarify the reason for this
-        v512[62] = 0x02;
-
-        bytes memory v0 = new bytes(BLOCK_SIZE);
-        bytes memory Sigma = new bytes(BLOCK_SIZE);
-        bytes memory N = new bytes(BLOCK_SIZE);
-        return (v512, v0, Sigma, N);
-    }
-
     function getC() internal pure returns (bytes[12] memory) {
         // Constant values for KeySchedule function
 
