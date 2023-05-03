@@ -17,13 +17,13 @@ contract PublicKeyLibTest is Test {
         pubKey.init(PublicKeyLib.Mode.Mode2001, pubKeyRaw);
 
         assertEq(
-            bytes32(uint(pubKey.X)),
+            bytes32(uint(pubKey.x)),
             bytes32(
                 0xee25d54d66e573a9dbfcb76192eedf4abc59d99f8b8dbb345c2d55f0d8d74d36
             )
         );
         assertEq(
-            bytes32(uint(pubKey.Y)),
+            bytes32(uint(pubKey.y)),
             bytes32(
                 0x8191865C323A156FD27EC712C2BE89A15937C8C50BC428AC9BC2B878979F1EA4
             )

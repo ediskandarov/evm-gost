@@ -11,7 +11,7 @@ library PublicKeyLib {
 
     struct PublicKey {
         CurveLib.Curve curve;
-        int mode;
+        Mode mode;
         int x;
         int y;
     }
@@ -41,6 +41,4 @@ library PublicKeyLib {
         pubKey.mode = mode;
         // pubKey.curve = ;
     }
-
-    function verifyDigest(PublicKey memory pubKey)
 }

@@ -4,8 +4,7 @@ pragma solidity 0.8.19;
 import "./intModInverse.sol";
 
 library CurveLib {
-    using intModInverse for int;
-    using intModInverse for uint;
+    using uintModInverse for uint;
 
     struct Curve {
         uint p; // Characteristic of the underlying prime field
@@ -85,12 +84,12 @@ library CurveLib {
             // double
             t =
                 ((uint(3) * p1x * p1x + curve.a) *
-                    intModInverse.modinv(uint(2) * p1y, curve.p)) %
+                    uintModInverse.modinv(uint(2) * p1y, curve.p)) %
                 curve.p;
         } else {
             tx_ = pos(curve, p2x - p1x) % curve.p;
             ty = pos(curve, p2y - p1y) % curve.p;
-            t = (ty * intModInverse.modinv(tx_, curve.p)) % curve.p;
+            t = (ty * uintModInverse.modinv(tx_, curve.p)) % curve.p;
         }
         tx_ = pos(curve, t * t - p1x - p2x) % curve.p;
         ty = pos(curve, t * (p1x - tx_) - p1y) % curve.p;
@@ -99,14 +98,14 @@ library CurveLib {
 
     function exp(
         Curve memory curve,
-        int degree,
-        int x,
-        int y
-    ) internal pure returns (int, int) {
+        uint degree,
+        uint x,
+        uint y
+    ) internal pure returns (uint, uint) {
         x = x != 0 ? x : curve.x;
         y = y != 0 ? y : curve.y;
-        int tx_ = x;
-        int ty = y;
+        uint tx_ = x;
+        uint ty = y;
 
         require(degree != 0, "Bad degree value");
 
