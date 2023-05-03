@@ -6,34 +6,30 @@ import "solidity-BigNumber/BigNumbers.sol";
 library BNModInverse {
     using BigNumbers for BigNumber;
 
-    function div256(
-        BigNumber memory a,
-        BigNumber memory b
-    ) internal view returns (BigNumber memory) {
+    function toUint256(BigNumber memory a) internal view returns (uint r) {
         BigNumber memory uintMax = BigNumbers.init(
             0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
             false
         );
+
         require(a.lte(uintMax), "division operand a is too big");
-        require(b.lte(uintMax), "division operand b is too big");
         require(
             a.val.length == 32,
             "operand a value length should be 32 bytes"
         ); // one word (32 bytes)
-        require(
-            b.val.length == 32,
-            "operand b value length should be 32 bytes"
-        ); // one word (32 bytes)
-
-        uint aUint;
-        uint bUint;
 
         bytes memory aRaw = a.val;
-        bytes memory bRaw = b.val;
         assembly {
-            aUint := mload(add(aRaw, 32))
-            bUint := mload(add(bRaw, 32))
+            r := mload(add(aRaw, 32))
         }
+    }
+
+    function div256(
+        BigNumber memory a,
+        BigNumber memory b
+    ) internal view returns (BigNumber memory) {
+        uint aUint = toUint256(a);
+        uint bUint = toUint256(b);
 
         uint result = aUint / bUint;
         bool resultNeg = false;
