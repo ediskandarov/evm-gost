@@ -151,14 +151,14 @@ library CurveLib {
         if (r <= 0 || r >= q || s <= 0 || s >= q) {
             return false;
         }
-        uint e = uint(digest) % curve.q;
+        uint e = uint(digest) % curve.q; // aka h
         if (e == 0) {
             e = 1;
         }
 
-        uint v = e.modinv(q);
-        uint z1 = (s * v) % q;
-        uint z2 = q - ((r * v) % q);
+        uint v = e.modinv(q); // 1/h mod q
+        uint z1 = (s * v) % q; // z1 = s / h
+        uint z2 = q - ((r * v) % q); // z2 = -r
         (uint p1x, uint p1y) = exp(curve, z1);
         (uint q1x, uint q1y) = exp(curve, z2, pubX, pubY);
         uint lm = q1x - p1x;

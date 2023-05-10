@@ -8,6 +8,10 @@ library CurveLib {
     using BNModInverse for BigNumber;
     using BigNumbers for BigNumber;
 
+    event log(string);
+    event logs(bytes);
+    event log_uint(uint);
+
     struct Curve {
         BigNumber p; // Characteristic of the underlying prime field
         BigNumber q; // Elliptic curve subgroup order
@@ -21,6 +25,13 @@ library CurveLib {
         BigNumber x;
         BigNumber y;
         uint cofactor;
+    }
+
+    struct ExpVars {
+        BigNumber p1x;
+        BigNumber p1y;
+        BigNumber p2x;
+        BigNumber p2y;
     }
 
     function newCurve(
@@ -79,36 +90,35 @@ library CurveLib {
 
     function _add(
         Curve memory curve,
-        BigNumber memory p1x,
-        BigNumber memory p1y,
-        BigNumber memory p2x,
-        BigNumber memory p2y
+        ExpVars memory vars
     ) internal view returns (BigNumber memory, BigNumber memory) {
         BigNumber memory t;
         BigNumber memory tx_;
         BigNumber memory ty;
-        if (p1x.eq(p2x) && p1y.eq(p2y)) {
-            BigNumber memory three = BigNumbers.init(3, false);
-            BigNumber memory two = BigNumbers.two();
-            // double
-            t = (three.mul(p1x).mul(p1x).add(curve.a)).modmul(
-                (two.mul(p1y).modinv256(curve.p)),
-                curve.p
-            );
+        if (vars.p1x.eq(vars.p2x) && vars.p1y.eq(vars.p2y)) {
+            {
+                BigNumber memory three = BigNumbers.init(3, false);
+                BigNumber memory two = BigNumbers.two();
+                // double
+                t = (three.mul(vars.p1x).mul(vars.p1x).add(curve.a)).modmul(
+                    (two.mul(vars.p1y).modinv256(curve.p)),
+                    curve.p
+                );
+            }
         } else {
-            tx_ = pos(curve, p2x.sub(p1x)).mod(curve.p);
-            ty = pos(curve, p2y.sub(p1y)).mod(curve.p);
+            tx_ = pos(curve, vars.p2x.sub(vars.p1x)).mod(curve.p);
+            ty = pos(curve, vars.p2y.sub(vars.p1y)).mod(curve.p);
             t = ty.modmul(tx_.modinv256(curve.p), curve.p);
         }
-        tx_ = pos(curve, t.mul(t).sub(p1x).sub(p2x)).mod(curve.p);
-        ty = pos(curve, t.mul((p1x.sub(tx_))).sub(p1y)).mod(curve.p);
+        tx_ = pos(curve, t.mul(t).sub(vars.p1x).sub(vars.p2x)).mod(curve.p);
+        ty = pos(curve, t.mul((vars.p1x.sub(tx_))).sub(vars.p1y)).mod(curve.p);
         return (tx_, ty);
     }
 
     function exp(
         Curve memory curve,
         uint degree
-    ) internal view returns (BigNumber memory, BigNumber memory) {
+    ) internal returns (BigNumber memory, BigNumber memory) {
         return exp(curve, degree, curve.x, curve.y);
     }
 
@@ -117,18 +127,24 @@ library CurveLib {
         uint degree,
         BigNumber memory x,
         BigNumber memory y
-    ) internal view returns (BigNumber memory, BigNumber memory) {
+    ) internal returns (BigNumber memory, BigNumber memory) {
         BigNumber memory tx_ = x;
         BigNumber memory ty = y;
 
         require(degree != 0, "Bad degree value");
 
+        emit log("exp operation");
+
         while (degree != 0) {
+            emit log("add iteration");
             if (degree & 1 == 1) {
-                (tx_, ty) = _add(curve, tx_, ty, x, y);
+                (tx_, ty) = _add(
+                    curve,
+                    ExpVars({p1x: tx_, p1y: ty, p2x: x, p2y: y})
+                );
             }
             degree = degree >> 1;
-            (x, y) = _add(curve, x, y, x, y);
+            (x, y) = _add(curve, ExpVars({p1x: x, p1y: y, p2x: x, p2y: y}));
         }
         return (tx_, ty);
     }
@@ -149,7 +165,7 @@ library CurveLib {
         uint pubY,
         bytes memory digest,
         bytes memory signature
-    ) internal view returns (bool) {
+    ) internal returns (bool) {
         require(signature.length == 64, "Invalid signature length");
 
         BigNumber memory q = curve.q;

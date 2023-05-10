@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "./CurveLib.sol";
+import "./BNCurveLib.sol";
 
 contract Gost3410Curve {
     bytes32 public constant GostR3410_2001_ParamSet_cc =
@@ -21,7 +21,7 @@ contract Gost3410Curve {
 
     function getCurve(
         bytes32 curveId
-    ) internal pure returns (CurveLib.Curve memory curve) {
+    ) public view returns (CurveLib.Curve memory curve) {
         if (curveId == GostR3410_2001_ParamSet_cc) {
             return
                 CurveLib.newCurve({
