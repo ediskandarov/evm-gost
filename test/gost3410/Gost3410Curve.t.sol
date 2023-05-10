@@ -1,0 +1,87 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.19;
+
+import "forge-std/Test.sol";
+import "../../src/gost3410/Gost3410Curve.sol";
+
+contract Gost3410CurveTest is Test {
+    using CurveLib for CurveLib.Curve;
+    using BigNumbers for BigNumber;
+
+    Gost3410Curve curve;
+
+    function setUp() public {
+        curve = new Gost3410Curve();
+    }
+
+    function test_getCurve() external {
+        bytes32 curveId = curve.id_tc26_gost_3410_12_256_paramSetB();
+        CurveLib.Curve memory c = curve.getCurve(curveId);
+
+        assertTrue(true);
+    }
+
+    function test_curve1() external {
+        bytes32 curveId = curve.id_tc26_gost_3410_12_256_paramSetB();
+        CurveLib.Curve memory c = curve.getCurve(curveId);
+
+        BigNumber memory x = BigNumbers.init(
+            0xA69D51CAF1A309FA9E9B66187759B0174C274E080356F23CFCBFE84D396AD7BB,
+            false
+        );
+        BigNumber memory y = BigNumbers.init(
+            0x5D26F29ECC2E9AC0404DCF7986FA55FE94986362170F54B9616426A659786DAC,
+            false
+        );
+        uint degree = 0xBD04673F7149B18E98155BD1E2724E71D0099AA25174F792D3326C6F18127067;
+
+        (BigNumber memory xr, BigNumber memory yr) = c.exp(degree, x, y);
+
+        assertTrue(
+            xr.eq(
+                BigNumbers.init(
+                    0x59495655D1E7C7424C622485F575CCF121F3122D274101E8AB734CC9C9A9B45E,
+                    false
+                )
+            )
+        );
+        assertTrue(
+            yr.eq(
+                BigNumbers.init(
+                    0x48D1C311D33C9B701F3B03618562A4A07A044E3AF31E3999E67B487778B53C62,
+                    false
+                )
+            )
+        );
+
+        /**
+        q_ind = (
+            0xA69D51CAF1A309FA9E9B66187759B0174C274E080356F23CFCBFE84D396AD7BB,
+            0x5D26F29ECC2E9AC0404DCF7986FA55FE94986362170F54B9616426A659786DAC,
+        )
+        self.assertEqual(
+            c.exp(bytes2long(hexdec(
+                "BD04673F7149B18E98155BD1E2724E71D0099AA25174F792D3326C6F18127067"
+            )[::-1]), x=q_ind[0], y=q_ind[1]),
+            (
+                0x59495655D1E7C7424C622485F575CCF121F3122D274101E8AB734CC9C9A9B45E,
+                0x48D1C311D33C9B701F3B03618562A4A07A044E3AF31E3999E67B487778B53C62,
+            )
+        )
+        self.assertEqual(
+            c.exp(0x1F2538097D5A031FA68BBB43C84D12B3DE47B7061C0D5E24993E0C873CDBA6B3),
+            (
+                0xBBC77CF42DC1E62D06227935379B4AA4D14FEA4F565DDF4CB4FA4D31579F9676,
+                0x8E16604A4AFDF28246684D4996274781F6CB80ABBBA1414C1513EC988509DABF,
+            )
+        )
+        self.assertEqual(
+            c.exp(0xDC497D9EF6324912FD367840EE509A2032AEDB1C0A890D133B45F596FCCBD45D),
+            (
+                0x6097341C1BE388E83E7CA2DF47FAB86E2271FD942E5B7B2EB2409E49F742BC29,
+                0xC81AA48BDB4CA6FA0EF18B9788AE25FE30857AA681B3942217F9FED151BAB7D0,
+            ),
+        )
+*/
+    }
+}
