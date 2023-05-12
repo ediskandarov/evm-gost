@@ -6,7 +6,6 @@ import "../../src/gost3410/Gost3410Curve.sol";
 
 contract Gost3410CurveTest is Test {
     using CurveLib for CurveLib.Curve;
-    using BigNumbers for BigNumber;
 
     Gost3410Curve curve;
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "./BNCurveLib.sol";
+import "./CurveLib.sol";
 
 contract Gost3410Curve {
     bytes32 public constant GostR3410_2001_ParamSet_cc =
