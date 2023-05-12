@@ -107,4 +107,206 @@ library scalar {
             overflow = over;
         }
     }
+
+    function scalar_mul(uint256 x, uint256 y) internal pure returns (uint256) {
+        uint64[8] memory l = scalar_mul_512(x, y);
+        uint z = scalar_reduce_512(l);
+        return z;
+    }
+
+    function scalar_mul_512(
+        uint256 a,
+        uint256 b
+    ) internal pure returns (uint64[8] memory) {
+        uint64[8] memory l;
+        /* 160 bit accumulator. */
+        uint64 c0 = 0;
+        uint64 c1 = 0;
+        uint32 c2 = 0;
+
+        (c0, c1) = muladd_fast(
+            c0,
+            c1,
+            scalar_to_u64(a, 0),
+            scalar_to_u64(b, 0)
+        );
+        // extract_fast
+        (l[0], c0, c1) = (c0, c1, 0);
+
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 0),
+            scalar_to_u64(b, 1)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 1),
+            scalar_to_u64(b, 0)
+        );
+        // extract
+        (l[1], c0, c1, c2) = (c0, c1, c2, 0);
+
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 0),
+            scalar_to_u64(b, 2)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 1),
+            scalar_to_u64(b, 1)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 2),
+            scalar_to_u64(b, 0)
+        );
+        // extract
+        (l[2], c0, c1, c2) = (c0, c1, c2, 0);
+
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 0),
+            scalar_to_u64(b, 3)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 1),
+            scalar_to_u64(b, 2)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 2),
+            scalar_to_u64(b, 1)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 3),
+            scalar_to_u64(b, 0)
+        );
+        // extract
+        (l[3], c0, c1, c2) = (c0, c1, c2, 0);
+
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 1),
+            scalar_to_u64(b, 3)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 2),
+            scalar_to_u64(b, 2)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 3),
+            scalar_to_u64(b, 1)
+        );
+        // extract
+        (l[4], c0, c1, c2) = (c0, c1, c2, 0);
+
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 2),
+            scalar_to_u64(b, 3)
+        );
+        (c0, c1, c2) = muladd(
+            c0,
+            c1,
+            c2,
+            scalar_to_u64(a, 3),
+            scalar_to_u64(b, 2)
+        );
+        // extract
+        (l[5], c0, c1, c2) = (c0, c1, c2, 0);
+
+        (c0, c1) = muladd_fast(
+            c0,
+            c1,
+            scalar_to_u64(a, 3),
+            scalar_to_u64(b, 3)
+        );
+        // extract_fast
+        (l[6], c0, c1) = (c0, c1, 0);
+
+        l[7] = c0;
+        return l;
+    }
+
+    function scalar_reduce_512(
+        uint64[8] memory l
+    ) internal pure returns (uint256) {}
+
+    function muladd_fast(
+        uint64 c0,
+        uint64 c1,
+        uint64 a,
+        uint64 b
+    ) internal pure returns (uint64, uint64) {
+        uint128 t = uint128(a) * uint128(b);
+
+        uint64 th = u128_hi_u64(t);
+        uint64 tl = u128_lo_u64(t);
+
+        c0 += tl;
+        th += (c0 < tl) ? 1 : 0;
+        c1 += th;
+
+        return (c0, c1);
+    }
+
+    function muladd(
+        uint64 c0,
+        uint64 c1,
+        uint32 c2,
+        uint64 a,
+        uint64 b
+    ) internal pure returns (uint64, uint64, uint32) {
+        uint128 t = uint128(a) * uint128(b);
+
+        uint64 th = u128_hi_u64(t);
+        uint64 tl = u128_lo_u64(t);
+
+        unchecked {
+            c0 += tl;
+            th += (c0 < tl) ? 1 : 0;
+            c1 += th;
+            c2 += (c1 < th) ? 1 : 0;
+        }
+        return (c0, c1, c2);
+    }
+
+    function u128_hi_u64(uint128 x) internal pure returns (uint64) {
+        return uint64(x >> 64);
+    }
+
+    function u128_lo_u64(uint128 x) internal pure returns (uint64) {
+        return uint64(x);
+    }
 }
