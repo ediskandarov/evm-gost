@@ -262,22 +262,92 @@ library scalar {
     function scalar_reduce_512(
         uint64[8] memory l
     ) internal pure returns (uint256) {
-        uint128 c128;
-
-        uint64 c_;
-        uint64[3] memory c;
-        uint64[4] memory n;
-        uint64[6] memory m;
-        uint64[5] memory p;
-
-        (n[0], n[1], n[2], n[3]) = (l[4], l[5], l[6], l[7]);
+        uint64 c0;
+        uint64 c1;
+        uint64 c2;
+        uint64[7] memory m;
 
         /* Reduce 512 bits into 385. */
         /* m[0..6] = l[0..3] + n[0..3] * SECP256K1_N_C. */
-        (c[0], c[1], c[2]) = (l[0], 0, 0);
-        (c[0], c[1]) = muladd_fast(c[0], c[1], n[0], SECP256K1_N_C_0);
-        // extract_fast
-        (m[0], c[0], c[1]) = (c[0], c[1], 0);
+        {
+            uint64[4] memory n;
+            (n[0], n[1], n[2], n[3]) = (l[4], l[5], l[6], l[7]);
+
+            (c0, c1, c2) = (l[0], 0, 0);
+            (c0, c1) = muladd_fast(c0, c1, n[0], SECP256K1_N_C_0);
+            // extract_fast
+            (m[0], c0, c1) = (c0, c1, 0);
+
+            (c0, c1, c2) = sumadd_fast(c0, c1, c2, l[1]);
+            (c0, c1, c2) = muladd(c0, c1, c2, n[1], SECP256K1_N_C_0);
+            (c0, c1, c2) = muladd(c0, c1, c2, n[0], SECP256K1_N_C_1);
+            // extract
+            (m[1], c0, c1, c2) = (c0, c1, c2, 0);
+
+            (c0, c1, c2) = sumadd(c0, c1, c2, l[2]);
+            (c0, c1, c2) = muladd(c0, c1, c2, n[2], SECP256K1_N_C_0);
+            (c0, c1, c2) = muladd(c0, c1, c2, n[1], SECP256K1_N_C_1);
+            (c0, c1, c2) = sumadd(c0, c1, c2, n[0]);
+            // extract
+            (m[2], c0, c1, c2) = (c0, c1, c2, 0);
+
+            (c0, c1, c2) = sumadd(c0, c1, c2, l[3]);
+            (c0, c1, c2) = muladd(c0, c1, c2, n[3], SECP256K1_N_C_0);
+            (c0, c1, c2) = muladd(c0, c1, c2, n[2], SECP256K1_N_C_1);
+            (c0, c1, c2) = sumadd(c0, c1, c2, n[1]);
+            // extract
+            (m[3], c0, c1, c2) = (c0, c1, c2, 0);
+
+            (c0, c1, c2) = muladd(c0, c1, c2, n[3], SECP256K1_N_C_1);
+            (c0, c1, c2) = sumadd(c0, c1, c2, n[2]);
+            // extract
+            (m[4], c0, c1, c2) = (c0, c1, c2, 0);
+
+            (c0, c1, c2) = sumadd_fast(c0, c1, c2, n[3]);
+            // extract_fast
+            (m[5], c0, c1) = (c0, c1, 0);
+            assert(c0 <= 1);
+            m[6] = c0;
+        }
+
+        /* Reduce 385 bits into 258. */
+        /* p[0..4] = m[0..3] + m[4..6] * SECP256K1_N_C. */
+        {
+            uint64[5] memory p;
+            (c0, c1, c2) = (m[0], 0, 0);
+            (c0, c1) = muladd_fast(c0, c1, m[4], SECP256K1_N_C_0);
+            // extract_fast
+            (p[0], c0, c1) = (c0, c1, 0);
+
+            (c0, c1, c2) = sumadd_fast(c0, c1, c2, m[1]);
+            (c0, c1, c2) = muladd(c0, c1, c2, m[5], SECP256K1_N_C_0);
+            (c0, c1, c2) = muladd(c0, c1, c2, m[4], SECP256K1_N_C_1);
+            // extract
+            (p[1], c0, c1, c2) = (c0, c1, c2, 0);
+
+            (c0, c1, c2) = sumadd(c0, c1, c2, m[2]);
+            (c0, c1, c2) = muladd(c0, c1, c2, m[6], SECP256K1_N_C_0);
+            (c0, c1, c2) = muladd(c0, c1, c2, m[5], SECP256K1_N_C_1);
+            (c0, c1, c2) = sumadd(c0, c1, c2, m[4]);
+            // extract
+            (p[2], c0, c1, c2) = (c0, c1, c2, 0);
+
+            (c0, c1, c2) = sumadd_fast(c0, c1, c2, m[3]);
+            (c0, c1) = muladd_fast(c0, c1, m[6], SECP256K1_N_C_1);
+            (c0, c1, c2) = sumadd_fast(c0, c1, c2, m[5]);
+            // extract_fast
+            (p[3], c0, c1) = (c0, c1, 0);
+
+            p[4] = c0 + m[6];
+            assert(p[4] <= 2);
+        }
+
+        /* Reduce 258 bits into 256. */
+        /* r[0..3] = p[0..3] + p[4] * SECP256K1_N_C. */
+        {
+            uint64 c;
+            uint128 c128;
+        }
     }
 
     /** Add a*b to the number defined by (c0,c1). c1 must never overflow. */
