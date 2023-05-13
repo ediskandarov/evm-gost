@@ -262,9 +262,11 @@ library scalar {
     function scalar_reduce_512(
         uint64[8] memory l
     ) internal pure returns (uint256) {
+        uint64 c;
         uint64 c0;
         uint64 c1;
         uint64 c2;
+        uint256 r;
         uint64[7] memory m;
 
         /* Reduce 512 bits into 385. */
@@ -312,8 +314,8 @@ library scalar {
 
         /* Reduce 385 bits into 258. */
         /* p[0..4] = m[0..3] + m[4..6] * SECP256K1_N_C. */
+        uint64[5] memory p;
         {
-            uint64[5] memory p;
             (c0, c1, c2) = (m[0], 0, 0);
             (c0, c1) = muladd_fast(c0, c1, m[4], SECP256K1_N_C_0);
             // extract_fast
@@ -345,9 +347,25 @@ library scalar {
         /* Reduce 258 bits into 256. */
         /* r[0..3] = p[0..3] + p[4] * SECP256K1_N_C. */
         {
-            uint64 c;
-            uint128 c128;
+            uint128 c128 = uint128(p[0]);
+            c128 += uint128(SECP256K1_N_C_0) * uint128(p[4]);
+            r = scalar_set_u64(r, u128_to_u64(c128), 0);
+            c128 = c128 >> 64;
+            c128 += p[1];
+            c128 += uint128(SECP256K1_N_C_1) * uint128(p[4]);
+            r = scalar_set_u64(r, u128_to_u64(c128), 1);
+            c128 = c128 >> 64;
+            c128 += p[2];
+            c128 += p[4];
+            r = scalar_set_u64(r, u128_to_u64(c128), 2);
+            c128 = c128 >> 64;
+            c128 += p[3];
+            r = scalar_set_u64(r, u128_to_u64(c128), 3);
+            c = u128_hi_u64(c128);
         }
+
+        (r, ) = scalar_reduce(r, c + (scalar_check_overflow(r) ? 1 : 0));
+        return r;
     }
 
     /** Add a*b to the number defined by (c0,c1). c1 must never overflow. */

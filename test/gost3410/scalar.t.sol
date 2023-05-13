@@ -19,6 +19,19 @@ contract PublicKeyLibTest is Test {
         );
     }
 
+    function test_scalar_mul() external {
+        uint256 a = 0xffffffffffffffff8899aabbccddeeff11223344556677889900aabbccddeeff;
+        uint256 b = 0xfffe060ef9fb2a32fffe060dfffffe0701f4042a01f1fc19e39c060377f5a697;
+
+        uint256 r = scalar.scalar_mul(a, b);
+
+        // Result calculated in python (a * b) % SECP256K1_N
+        assertEqUint(
+            r,
+            0x5267cf099f11c32ab5773096c8b2d07c96e4a62c4287583415e2b0367a93a832
+        );
+    }
+
     function test_scalar_mul512() external {
         uint256 a = 0xffff030700000000ffffffffffffff030000000000f8ffffffff0300c0ffffff;
         uint256 b = 0xffff030700000000ffffffffffffff030000000000f8ffffffff0300c0ffffff;
