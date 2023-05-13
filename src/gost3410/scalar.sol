@@ -122,7 +122,7 @@ library scalar {
         /* 160 bit accumulator. */
         uint64 c0 = 0;
         uint64 c1 = 0;
-        uint32 c2 = 0;
+        uint64 c2 = 0;
 
         (c0, c1) = muladd_fast(
             c0,
@@ -261,8 +261,26 @@ library scalar {
 
     function scalar_reduce_512(
         uint64[8] memory l
-    ) internal pure returns (uint256) {}
+    ) internal pure returns (uint256) {
+        uint128 c128;
 
+        uint64 c_;
+        uint64[3] memory c;
+        uint64[4] memory n;
+        uint64[6] memory m;
+        uint64[5] memory p;
+
+        (n[0], n[1], n[2], n[3]) = (l[4], l[5], l[6], l[7]);
+
+        /* Reduce 512 bits into 385. */
+        /* m[0..6] = l[0..3] + n[0..3] * SECP256K1_N_C. */
+        (c[0], c[1], c[2]) = (l[0], 0, 0);
+        (c[0], c[1]) = muladd_fast(c[0], c[1], n[0], SECP256K1_N_C_0);
+        // extract_fast
+        (m[0], c[0], c[1]) = (c[0], c[1], 0);
+    }
+
+    /** Add a*b to the number defined by (c0,c1). c1 must never overflow. */
     function muladd_fast(
         uint64 c0,
         uint64 c1,
@@ -271,34 +289,79 @@ library scalar {
     ) internal pure returns (uint64, uint64) {
         uint128 t = uint128(a) * uint128(b);
 
-        uint64 th = u128_hi_u64(t);
-        uint64 tl = u128_lo_u64(t);
-
-        c0 += tl;
-        th += (c0 < tl) ? 1 : 0;
-        c1 += th;
-
-        return (c0, c1);
-    }
-
-    function muladd(
-        uint64 c0,
-        uint64 c1,
-        uint32 c2,
-        uint64 a,
-        uint64 b
-    ) internal pure returns (uint64, uint64, uint32) {
-        uint128 t = uint128(a) * uint128(b);
-
-        uint64 th = u128_hi_u64(t);
+        uint64 th = u128_hi_u64(t); /* at most 0xFFFFFFFFFFFFFFFE */
         uint64 tl = u128_lo_u64(t);
 
         unchecked {
-            c0 += tl;
-            th += (c0 < tl) ? 1 : 0;
-            c1 += th;
-            c2 += (c1 < th) ? 1 : 0;
+            c0 += tl; /* overflow is handled on the next line */
+            th += (c0 < tl) ? 1 : 0; /* at most 0xFFFFFFFFFFFFFFFF */
         }
+        c1 += th; /* never overflows by contract (verified in the next line) */
+
+        assert(c1 >= th);
+        return (c0, c1);
+    }
+
+    /** Add a*b to the number defined by (c0,c1,c2). c2 must never overflow. */
+    function muladd(
+        uint64 c0,
+        uint64 c1,
+        uint64 c2,
+        uint64 a,
+        uint64 b
+    ) internal pure returns (uint64, uint64, uint64) {
+        uint128 t = uint128(a) * uint128(b);
+
+        uint64 th = u128_hi_u64(t); /* at most 0xFFFFFFFFFFFFFFFE */
+        uint64 tl = u128_lo_u64(t);
+
+        unchecked {
+            c0 += tl; /* overflow is handled on the next line */
+            th += (c0 < tl ? 1 : 0); /* at most 0xFFFFFFFFFFFFFFFF */
+            c1 += th; /* overflow is handled on the next line */
+        }
+        c2 += (
+            c1 < th ? 1 : 0
+        ); /* never overflows by contract (verified in the next line) */
+
+        assert((c1 >= th) || (c2 != 0));
+        return (c0, c1, c2);
+    }
+
+    /** Add a to the number defined by (c0,c1). c1 must never overflow, c2 must be zero. */
+    function sumadd_fast(
+        uint64 c0,
+        uint64 c1,
+        uint64 c2,
+        uint64 a
+    ) internal pure returns (uint64, uint64, uint64) {
+        unchecked {
+            c0 += a; /* overflow is handled on the next line */
+        }
+        c1 += (
+            c0 < a ? 1 : 0
+        ); /* never overflows by contract (verified the next line) */
+        assert((c1 != 0) || (c0 >= a));
+        assert(c2 == 0);
+        return (c0, c1, c2);
+    }
+
+    /** Add a to the number defined by (c0,c1,c2). c2 must never overflow. */
+    function sumadd(
+        uint64 c0,
+        uint64 c1,
+        uint64 c2,
+        uint64 a
+    ) internal pure returns (uint64, uint64, uint64) {
+        uint64 over;
+
+        unchecked {
+            c0 += a; /* overflow is handled on the next line */
+            over = c0 < a ? 1 : 0;
+            c1 += over; /* overflow is handled on the next line */
+        }
+        c2 += c1 < over ? 1 : 0; /* never overflows by contract */
+
         return (c0, c1, c2);
     }
 
