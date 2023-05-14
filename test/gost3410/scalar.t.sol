@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 import "../../src/gost3410/scalar.sol";
 
-contract PublicKeyLibTest is Test {
+contract ScalarTest is Test {
     function test_scalar_set_b32() external {
         // prettier-ignore
         uint8[32] memory b32 = [0xff, 0xff, 0x03, 0x07, 0x00, 0x00, 0x00, 0x00,
