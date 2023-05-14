@@ -28,6 +28,20 @@ contract intModInverseTest is Test {
         // assertEq(y, -5);
     }
 
+    function test_bgcd_1() external {
+        assertEq(uintModInverse.bgcd(11, 35), 1);
+    }
+
+    function test_bgcd_2() external {
+        assertEq(
+            uintModInverse.bgcd(
+                6322610860491544216932366519095,
+                177213750118348710766018615863777
+            ),
+            180646024585472691912353329117
+        );
+    }
+
     function test_modinv() external {
         assertEq(uint(23).modinv(97), 38);
         assertEq(uint(23).modinv(99), 56);

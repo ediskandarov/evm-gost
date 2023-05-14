@@ -45,6 +45,54 @@ library uintModInverse {
         return (b, x0, y0);
     }
 
+    function bgcd(uint a, uint b) internal pure returns (uint) {
+        // Stein's binary GCD algorithm
+        // Base cases: gcd(n, 0) = gcd(0, n) = n
+        if (a == 0) return b;
+        if (b == 0) return a;
+
+        // Extract common factor-2: gcd(2ⁱ n, 2ⁱ m) = 2ⁱ gcd(n, m)
+        // and reducing until odd gcd(2ⁱ n, m) = gcd(n, m) if m is odd
+        uint k;
+        {
+            uint k_a = ctz(a);
+            uint k_b = ctz(b);
+
+            a >>= k_a;
+            b >>= k_b;
+            k = (k_a > k_b) ? k_b : k_a;
+        }
+
+        while (true) {
+            // Invariant: n odd
+            assert(a % 2 == 1);
+            if (a > b) {
+                (a, b) = (b, a);
+            }
+            b -= a;
+
+            if (b == 0) {
+                return a << k;
+            }
+
+            b >>= ctz(b);
+        }
+    }
+
+    /* Determine the number of trailing zero bits in a (non-zero) 64-bit x. */
+    function ctz(uint a) internal pure returns (uint) {
+        // @todo this algorithm could be optimized
+        uint counter = 0;
+        for (uint i = 0; i < 64; i++) {
+            if ((a >> i) & 1 == 0) {
+                counter += 1;
+            } else {
+                break;
+            }
+        }
+        return counter;
+    }
+
     /**
      * return x such that (x * a) % b == 1
      */
