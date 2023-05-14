@@ -658,9 +658,21 @@ contract PublicKeyLibTest is Test {
             (x, ) = scalar.scalar_set_b32(chal[i][0]);
             (y, ) = scalar.scalar_set_b32(chal[i][1]);
             (r1, ) = scalar.scalar_set_b32(res[i][0]);
-        }
+            uint z = scalar.scalar_mul(x, y);
+            assertEqUint(z, r1);
 
-        assertTrue(x > 0);
-        assertTrue(y > 0);
+            if (y != 0) {
+                uint zz = 0;
+            }
+        }
+    }
+
+    function test_scalar_signed62() external {
+        uint256 x = scalar.SECP256K1_N;
+
+        assertEqUint(
+            x,
+            scalar.scalar_from_signed62(scalar.scalar_to_signed62(x))
+        );
     }
 }

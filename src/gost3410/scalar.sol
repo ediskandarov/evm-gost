@@ -30,6 +30,18 @@ library scalar {
         return uint128(uint64(x >> shift));
     }
 
+    function scalar_set_s64(
+        uint256 x,
+        int64 val,
+        uint index
+    ) internal pure returns (uint256) {
+        uint64 val_;
+        assembly {
+            val_ := val
+        }
+        return scalar_set_u64(x, val_, index);
+    }
+
     function scalar_set_u64(
         uint256 x,
         uint64 val,
@@ -112,6 +124,73 @@ library scalar {
         uint64[8] memory l = scalar_mul_512(x, y);
         uint z = scalar_reduce_512(l);
         return z;
+    }
+
+    function scalar_inverse(uint256 x) internal pure returns (uint256) {
+        int64[5] memory s;
+    }
+
+    function scalar_to_signed62(
+        uint256 a
+    ) internal pure returns (int64[5] memory) {
+        uint64 M62 = type(uint64).max >> 2;
+        (uint64 a0, uint64 a1, uint64 a2, uint64 a3) = (
+            scalar_to_u64(a, 0),
+            scalar_to_u64(a, 1),
+            scalar_to_u64(a, 2),
+            scalar_to_u64(a, 3)
+        );
+
+        int64 r0;
+        int64 r1;
+        int64 r2;
+        int64 r3;
+        int64 r4;
+
+        assembly {
+            // r->v[0] =  a0                   & M62;
+            r0 := and(a0, M62)
+            // r->v[1] = (a0 >> 62 | a1 <<  2) & M62;
+            r1 := and(or(shr(62, a0), shl(2, a1)), M62)
+            // r->v[2] = (a1 >> 60 | a2 <<  4) & M62;
+            r2 := and(or(shr(60, a1), shl(4, a2)), M62)
+            // r->v[3] = (a2 >> 58 | a3 <<  6) & M62;
+            r3 := and(or(shr(58, a2), shl(6, a3)), M62)
+            // r->v[4] =  a3 >> 56;
+            r4 := shr(56, a3)
+        }
+
+        return [r0, r1, r2, r3, r4];
+    }
+
+    function scalar_from_signed62(
+        int64[5] memory a
+    ) internal pure returns (uint256) {
+        (int64 a0, int64 a1, int64 a2, int64 a3, int64 a4) = (
+            a[0],
+            a[1],
+            a[2],
+            a[3],
+            a[4]
+        );
+
+        /* The output from secp256k1_modinv64{_var} should be normalized to range [0,modulus), and
+         * have limbs in [0,2^62). The modulus is < 2^256, so the top limb must be below 2^(256-62*4).
+         */
+        assert(a0 >> 62 == 0);
+        assert(a1 >> 62 == 0);
+        assert(a2 >> 62 == 0);
+        assert(a3 >> 62 == 0);
+        assert(a4 >> 8 == 0);
+
+        uint256 r;
+
+        r = scalar_set_s64(r, a0 | (a1 << 62), 0);
+        r = scalar_set_s64(r, (a1 >> 2) | (a2 << 60), 1);
+        r = scalar_set_s64(r, (a2 >> 4) | (a3 << 58), 2);
+        r = scalar_set_s64(r, (a3 >> 6) | (a4 << 56), 3);
+
+        return r;
     }
 
     function scalar_mul_512(
