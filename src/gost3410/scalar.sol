@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+import "./modinv64.sol";
+
 library scalar {
     uint256 constant SECP256K1_N =
         0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFE_BAAEDCE6_AF48A03B_BFD25E8C_D0364141;
@@ -127,7 +129,16 @@ library scalar {
     }
 
     function scalar_inverse(uint256 x) internal pure returns (uint256) {
-        int64[5] memory s;
+        modinv64.modinv64_modinfo
+            memory secp256k1_const_modinfo_scalar = modinv64.modinv64_modinfo(
+                [int64(0x3FD25E8CD0364141), 0x2ABB739ABD2280EE, -0x15, 0, 256],
+                0x34F20099AA774EC1
+            );
+
+        int64[5] memory s = scalar_to_signed62(x);
+        modinv64.modinv64_(s, secp256k1_const_modinfo_scalar);
+        uint256 r = scalar_from_signed62(s);
+        return r;
     }
 
     function scalar_to_signed62(
