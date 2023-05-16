@@ -79,6 +79,92 @@ library uintModInverse {
         }
     }
 
+    function ext_bgcd(
+        int256 x,
+        int256 y
+    ) internal pure returns (int256, int256, int256) {
+        int256 v;
+        int256 u;
+        int256 g = 1;
+
+        while (x % 2 == 0 && y % 2 == 0) {
+            x >>= 1;
+            y >>= 1;
+            g <<= 1;
+        }
+
+        (u, v) = (x, y);
+        (int A, int B, int C, int D) = (1, 0, 0, 1);
+
+        while (true) {
+            while (u % 2 == 0) {
+                u >>= 1;
+                if (A % 2 == 0 && B % 2 == 0) {
+                    A >>= 1;
+                    B >>= 1;
+                } else {
+                    A = (A + y) >> 1;
+                    B = (B - x) >> 1;
+                }
+            }
+
+            while (v % 2 == 0) {
+                v >>= 1;
+                if (C % 2 == 0 && D % 2 == 0) {
+                    C >>= 1;
+                    D >>= 1;
+                } else {
+                    C = (C + y) >> 1;
+                    D = (D - x) >> 1;
+                }
+            }
+
+            if (u >= v) {
+                u -= v;
+                A -= C;
+                B -= D;
+            } else {
+                v -= u;
+                C -= A;
+                D -= B;
+            }
+
+            if (u == 0) {
+                return (C, D, g * v);
+            }
+        }
+
+        return (0, 0, 0);
+    }
+
+    // function ext_bgcd(int256 y, int256 m) internal pure returns (int256) {
+    //     (int a, int u, int b, int v) = (y, 1, m, 0);
+
+    //     while (a != 0) {
+    //         if (a % 2 == 0) {
+    //             // a is even, so this division is exact
+    //             a /= 2;
+    //             u = (u / 2) % m;
+    //         } else {
+    //             if (a < b) {
+    //                 // conditional swap to ensure a ≥ b
+    //                 (a, u, b, v) = (b, v, a, u);
+    //             }
+    //             // a and b are odd, so this division is exact.
+    //             a = (a - b) / 2;
+    //             u = ((u - v) / 2) % m;
+    //         }
+    //     }
+
+    //     if (b != 1) {
+    //         // value y is not invertible
+    //         return 0;
+    //     }
+
+    //     // b contains GCD(y, m) at this point
+    //     return v;
+    // }
+
     /* Determine the number of trailing zero bits in a (non-zero) 64-bit x. */
     function ctz(uint a) internal pure returns (uint) {
         // @todo this algorithm could be optimized

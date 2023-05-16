@@ -7,27 +7,6 @@ import "../../src/gost3410/intModInverse.sol";
 contract intModInverseTest is Test {
     using uintModInverse for uint;
 
-    function test_egcd_1() external {
-        (uint g, uint x, uint y) = uintModInverse.egcd(23, 97);
-        assertEq(g, 1);
-        assertEq(x, 38);
-        // assertEq(y, -9);
-    }
-
-    function test_egcd_2() external {
-        (uint g, uint x, uint y) = uintModInverse.egcd(23, 99);
-        assertEq(g, 1);
-        // assertEq(x, -43);
-        assertEq(y, 10);
-    }
-
-    function test_egcd_3() external {
-        (uint g, uint x, uint y) = uintModInverse.egcd(11, 35);
-        assertEq(g, 1);
-        assertEq(x, 16);
-        // assertEq(y, -5);
-    }
-
     function test_bgcd_1() external {
         assertEq(uintModInverse.bgcd(11, 35), 1);
     }
@@ -40,6 +19,20 @@ contract intModInverseTest is Test {
             ),
             180646024585472691912353329117
         );
+    }
+
+    function test_ext_bgcd() external {
+        (int a, int b, int v) = uintModInverse.ext_bgcd(693, 609);
+        assertEq(a, -181);
+        assertEq(b, 206);
+        assertEq(v, 21);
+    }
+
+    function test_ext_bgcd_mod_inv_case() external {
+        (int a, int b, int v) = uintModInverse.ext_bgcd(693, 609);
+        assertEq(a, -181);
+        assertEq(b, 206);
+        assertEq(v, 21);
     }
 
     function test_modinv() external {
