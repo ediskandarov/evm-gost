@@ -29,12 +29,11 @@ contract intModInverseTest is Test {
     }
 
     function test_ext_bgcd_v2() external {
-        (uint v, uint a, bool isAPos, uint b, bool isBPos) = uintModInverse
-            .ext_bgcd_v2(693, 609);
+        (uint v, uint a, bool isAPos) = uintModInverse.ext_bgcd_v2(693, 609);
         assertEq(a, 181);
         assertFalse(isAPos);
-        assertEq(b, 206);
-        assertTrue(isBPos);
+        // assertEq(b, 206);
+        // assertTrue(isBPos);
         assertEq(v, 21);
     }
 

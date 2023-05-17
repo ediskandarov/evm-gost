@@ -151,7 +151,7 @@ library uintModInverse {
     function ext_bgcd_v2(
         uint256 x,
         uint256 y
-    ) internal pure returns (uint256, uint256, bool, uint256, bool) {
+    ) internal pure returns (uint256, uint256, bool) {
         uint256 v;
         uint256 u;
         uint256 g = 1;
@@ -170,27 +170,21 @@ library uintModInverse {
         while (true) {
             while (u % 2 == 0) {
                 u >>= 1;
-                if (vals[0] % 2 == 0 && vals[1] % 2 == 0) {
+                if (vals[0] % 2 == 0) {
                     vals[0] >>= 1;
-                    vals[1] >>= 1;
                 } else {
                     (vals[0], signs[0]) = _add(vals[0], signs[0], y, true); // A = A + y
                     vals[0] >>= 1;
-                    (vals[1], signs[1]) = _add(vals[1], signs[1], x, false); // B = B - x
-                    vals[1] >>= 1;
                 }
             }
 
             while (v % 2 == 0) {
                 v >>= 1;
-                if (vals[2] % 2 == 0 && vals[3] % 2 == 0) {
+                if (vals[2] % 2 == 0) {
                     vals[2] >>= 1;
-                    vals[3] >>= 1;
                 } else {
                     (vals[2], signs[2]) = _add(vals[2], signs[2], y, true); // C = C + y
                     vals[2] >>= 1;
-                    (vals[3], signs[3]) = _add(vals[3], signs[3], x, false); // D = D - x
-                    vals[3] >>= 1;
                 }
             }
 
@@ -202,12 +196,6 @@ library uintModInverse {
                     vals[2],
                     !signs[2]
                 ); // A = A - C
-                (vals[1], signs[1]) = _add(
-                    vals[1],
-                    signs[1],
-                    vals[3],
-                    !signs[3]
-                ); // B = B - D
             } else {
                 v -= u;
                 (vals[2], signs[2]) = _add(
@@ -216,20 +204,14 @@ library uintModInverse {
                     vals[0],
                     !signs[0]
                 ); // C = C - A
-                (vals[3], signs[3]) = _add(
-                    vals[3],
-                    signs[3],
-                    vals[1],
-                    !signs[1]
-                ); // D = D - B
             }
 
             if (u == 0) {
-                return (g * v, vals[2], signs[2], vals[3], signs[3]);
+                return (g * v, vals[2], signs[2]);
             }
         }
 
-        return (0, 0, true, 0, true);
+        return (0, 0, true);
     }
 
     function _add(
@@ -311,7 +293,7 @@ library uintModInverse {
      * return x such that (x * a) % b == 1
      */
     function modinv(uint a, uint b) internal pure returns (uint) {
-        (uint g, uint x, bool xIsPositive, , ) = ext_bgcd_v2(a, b);
+        (uint g, uint x, bool xIsPositive) = ext_bgcd_v2(a, b);
         assert(g == 1); // modular inverse exists check
 
         return modulo_v2(x, xIsPositive, b);
