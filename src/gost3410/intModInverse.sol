@@ -10,6 +10,18 @@ library uintModInverse {
         return ((x % N) + N) % N;
     }
 
+    function modulo_v2(uint x, bool sign, uint n) internal pure returns (uint) {
+        uint rem = x % n;
+        if (sign || rem == 0) {
+            // Positive number or 0
+            return rem;
+        } else {
+            // return (((x / n) + 1) * n) - x;
+            uint Q = (x / n) + 1;
+            return (Q * n) - x;
+        }
+    }
+
     function divmod(uint a, uint b) internal pure returns (uint, uint) {
         uint aDivB = a / b;
         uint aModB = modulo(a, b);
@@ -137,6 +149,123 @@ library uintModInverse {
         return (0, 0, 0);
     }
 
+    function ext_bgcd_v2(
+        uint256 x,
+        uint256 y
+    ) internal pure returns (uint256, uint256, bool, uint256, bool) {
+        uint256 v;
+        uint256 u;
+        uint256 g = 1;
+
+        while (x % 2 == 0 && y % 2 == 0) {
+            x >>= 1;
+            y >>= 1;
+            g <<= 1;
+        }
+
+        (u, v) = (x, y);
+        // A hack to avoid stack too deep issue
+        uint[4] memory vals = [uint256(1), 0, 0, 1];
+        bool[4] memory signs = [true, true, true, true];
+
+        while (true) {
+            while (u % 2 == 0) {
+                u >>= 1;
+                if (vals[0] % 2 == 0 && vals[1] % 2 == 0) {
+                    vals[0] >>= 1;
+                    vals[1] >>= 1;
+                } else {
+                    (vals[0], signs[0]) = _add(vals[0], signs[0], y, true); // A = A + y
+                    vals[0] >>= 1;
+                    (vals[1], signs[1]) = _add(vals[1], signs[1], x, false); // B = B - x
+                    vals[1] >>= 1;
+                }
+            }
+
+            while (v % 2 == 0) {
+                v >>= 1;
+                if (vals[2] % 2 == 0 && vals[3] % 2 == 0) {
+                    vals[2] >>= 1;
+                    vals[3] >>= 1;
+                } else {
+                    (vals[2], signs[2]) = _add(vals[2], signs[2], y, true); // C = C + y
+                    vals[2] >>= 1;
+                    (vals[3], signs[3]) = _add(vals[3], signs[3], x, false); // D = D - x
+                    vals[3] >>= 1;
+                }
+            }
+
+            if (u >= v) {
+                u -= v;
+                (vals[0], signs[0]) = _add(
+                    vals[0],
+                    signs[0],
+                    vals[2],
+                    !signs[2]
+                ); // A = A - C
+                (vals[1], signs[1]) = _add(
+                    vals[1],
+                    signs[1],
+                    vals[3],
+                    !signs[3]
+                ); // B = B - D
+            } else {
+                v -= u;
+                (vals[2], signs[2]) = _add(
+                    vals[2],
+                    signs[2],
+                    vals[0],
+                    !signs[0]
+                ); // C = C - A
+                (vals[3], signs[3]) = _add(
+                    vals[3],
+                    signs[3],
+                    vals[1],
+                    !signs[1]
+                ); // D = D - B
+            }
+
+            if (u == 0) {
+                return (g * v, vals[2], signs[2], vals[3], signs[3]);
+            }
+        }
+
+        return (0, 0, true, 0, true);
+    }
+
+    function _add(
+        uint256 x,
+        bool isXPositive,
+        uint256 y,
+        bool isYPositive
+    ) internal pure returns (uint256, bool) {
+        if (isXPositive && isYPositive) {
+            // both values are positive
+            return (x + y, true);
+        } else if (!isXPositive && !isYPositive) {
+            // both values are negative;
+            return (x + y, false);
+        } else if (!isXPositive && isYPositive) {
+            // x is negative, y is positive
+            if (x > y) {
+                // x is negative and its greater than y; result is negative
+                return (x - y, false);
+            } else {
+                // x is negative and its less than y; result is positive
+                return (y - x, true);
+            }
+        } else {
+            // x is positive, y is negative
+            if (x > y) {
+                // x is positive and its greater than y; result is positive
+                return (x - y, true);
+            } else {
+                // x is positive and its less than y; result is negative
+                return (y - x, false);
+            }
+        }
+    }
+
     // function ext_bgcd(int256 y, int256 m) internal pure returns (int256) {
     //     (int a, int u, int b, int v) = (y, 1, m, 0);
 
@@ -183,9 +312,9 @@ library uintModInverse {
      * return x such that (x * a) % b == 1
      */
     function modinv(uint a, uint b) internal pure returns (uint) {
-        (uint g, uint x, ) = xgcd(a, b);
-        assert(g == 1); // modular inverse does not exist
+        (uint g, uint x, bool xIsPositive, , ) = ext_bgcd_v2(a, b);
+        assert(g == 1); // modular inverse exists check
 
-        return modulo(x, b);
+        return modulo_v2(x, xIsPositive, b);
     }
 }

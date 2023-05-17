@@ -28,10 +28,13 @@ contract intModInverseTest is Test {
         assertEq(v, 21);
     }
 
-    function test_ext_bgcd_mod_inv_case() external {
-        (int a, int b, int v) = uintModInverse.ext_bgcd(693, 609);
-        assertEq(a, -181);
+    function test_ext_bgcd_v2() external {
+        (uint v, uint a, bool isAPos, uint b, bool isBPos) = uintModInverse
+            .ext_bgcd_v2(693, 609);
+        assertEq(a, 181);
+        assertFalse(isAPos);
         assertEq(b, 206);
+        assertTrue(isBPos);
         assertEq(v, 21);
     }
 
@@ -40,5 +43,10 @@ contract intModInverseTest is Test {
         assertEq(uint(23).modinv(99), 56);
         assertEq(uint(11).modinv(35), 16);
         assertEq(uint(38).modinv(93), 71);
+    }
+
+    function test_modulo_operation() external {
+        assertEq(uintModInverse.modulo_v2(145, true, 51), 43);
+        assertEq(uintModInverse.modulo_v2(145, false, 51), 8);
     }
 }
