@@ -13,12 +13,11 @@ library uintModInverse {
     function modulo_v2(uint x, bool sign, uint n) internal pure returns (uint) {
         uint rem = x % n;
         if (sign || rem == 0) {
-            // Positive number or 0
+            // x is positive number or 0
             return rem;
         } else {
-            // return (((x / n) + 1) * n) - x;
-            uint Q = (x / n) + 1;
-            return (Q * n) - x;
+            // x is negative
+            return n - rem;
         }
     }
 
