@@ -639,7 +639,7 @@ contract ScalarTest is Test {
             assertEqUint(z, r1);
 
             if (y != 0) {
-                uint zz = 0;
+                uint zz = scalar.scalar_inverse(x);
             }
         }
     }
