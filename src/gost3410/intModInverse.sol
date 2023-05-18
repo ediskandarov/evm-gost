@@ -148,6 +148,16 @@ library uintModInverse {
         return (0, 0, 0);
     }
 
+    /**
+     * v2 version of extended binary GCD algorythms
+     *
+     * Difference v1...v2:
+     *
+     * 1. use unsigned int instead of signed int
+     *    - this change required storing signs of some vars separately
+     * 2. do not calculate B and D vars, at they are not used
+     * 3. move loop stop check loop clause
+     */
     function ext_bgcd_v2(
         uint256 x,
         uint256 y
@@ -163,55 +173,97 @@ library uintModInverse {
         }
 
         (u, v) = (x, y);
-        // A hack to avoid stack too deep issue
-        uint[4] memory vals = [uint256(1), 0, 0, 1];
-        bool[4] memory signs = [true, true, true, true];
+        (uint A, uint C) = (1, 0);
+        (bool aSign, bool cSign) = (true, true);
 
-        while (true) {
+        while (u != 0) {
             while (u % 2 == 0) {
                 u >>= 1;
-                if (vals[0] % 2 == 0) {
-                    vals[0] >>= 1;
+                if (A % 2 == 0) {
+                    A >>= 1;
                 } else {
-                    (vals[0], signs[0]) = _add(vals[0], signs[0], y, true); // A = A + y
-                    vals[0] >>= 1;
+                    (A, aSign) = _add(A, aSign, y, true); // A = A + y
+                    A >>= 1;
                 }
             }
 
             while (v % 2 == 0) {
                 v >>= 1;
-                if (vals[2] % 2 == 0) {
-                    vals[2] >>= 1;
+                if (C % 2 == 0) {
+                    C >>= 1;
                 } else {
-                    (vals[2], signs[2]) = _add(vals[2], signs[2], y, true); // C = C + y
-                    vals[2] >>= 1;
+                    (C, cSign) = _add(C, cSign, y, true); // C = C + y
+                    C >>= 1;
                 }
             }
 
             if (u >= v) {
                 u -= v;
-                (vals[0], signs[0]) = _add(
-                    vals[0],
-                    signs[0],
-                    vals[2],
-                    !signs[2]
-                ); // A = A - C
+                (A, aSign) = _add(A, aSign, C, !cSign); // A = A - C
             } else {
                 v -= u;
-                (vals[2], signs[2]) = _add(
-                    vals[2],
-                    signs[2],
-                    vals[0],
-                    !signs[0]
-                ); // C = C - A
-            }
-
-            if (u == 0) {
-                return (g * v, vals[2], signs[2]);
+                (C, cSign) = _add(C, cSign, A, !aSign); // C = C - A
             }
         }
 
-        return (0, 0, true);
+        return (g * v, C, cSign);
+    }
+
+    /**
+     * v3 version of extended binary GCD algorythms
+     *
+     * Difference v2...v3:
+     * 1. unify variables with https://eprint.iacr.org/2020/972.pdf algorythm
+     * 2. apply requirements
+     * 3. remove optimization for trailing zeros
+     * 4. replace condition with variables swapping
+     */
+    function ext_bgcd_v3(
+        uint256 y,
+        uint256 m
+    ) internal pure returns (uint256, uint256, bool) {
+        assert(m >= 3);
+        assert(m % 2 == 1);
+        assert(y >= 0);
+        assert(y < m);
+        uint a;
+        uint b;
+        uint u;
+        uint v;
+
+        (a, u, b, v) = (y, 1, m, 0);
+        (bool uSign, bool vSign) = (true, true);
+
+        while (a != 0) {
+            while (a % 2 == 0) {
+                a >>= 1;
+                if (u % 2 == 0) {
+                    u >>= 1;
+                } else {
+                    (u, uSign) = _add(u, uSign, m, true); // u = u + m
+                    u >>= 1;
+                }
+            }
+
+            while (b % 2 == 0) {
+                b >>= 1;
+                if (v % 2 == 0) {
+                    v >>= 1;
+                } else {
+                    (v, vSign) = _add(v, vSign, m, true); // v = v + m
+                    v >>= 1;
+                }
+            }
+
+            if (a < b) {
+                (a, u, b, v) = (b, v, a, u);
+            }
+
+            a -= b;
+            (u, uSign) = _add(u, uSign, v, !vSign); // u = u - v
+        }
+
+        return (b, v, vSign);
     }
 
     function _add(

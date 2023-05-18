@@ -28,6 +28,13 @@ contract intModInverseTest is Test {
         assertEq(v, 21);
     }
 
+    function test_ext_bgcd_1() external {
+        (int a, int b, int v) = uintModInverse.ext_bgcd(609, 693);
+        assertEq(a, 173);
+        assertEq(b, -152);
+        assertEq(v, 21);
+    }
+
     function test_ext_bgcd_v2() external {
         (uint v, uint a, bool isAPos) = uintModInverse.ext_bgcd_v2(693, 609);
         assertEq(a, 181);
@@ -35,6 +42,33 @@ contract intModInverseTest is Test {
         // assertEq(b, 206);
         // assertTrue(isBPos);
         assertEq(v, 21);
+    }
+
+    function test_ext_bgcd_v2_1() external {
+        (uint v, uint a, bool isAPos) = uintModInverse.ext_bgcd_v2(609, 693);
+        assertEq(a, 173);
+        assertTrue(isAPos);
+        // assertEq(b, 206);
+        // assertTrue(isBPos);
+        assertEq(v, 21);
+    }
+
+    function test_ext_bgcd_v3_1() external {
+        (uint v, uint a, bool isAPos) = uintModInverse.ext_bgcd_v3(609, 693);
+        assertEq(a, 173);
+        assertTrue(isAPos);
+        // assertEq(b, 206);
+        // assertTrue(isBPos);
+        assertEq(v, 21);
+    }
+
+    function test_ext_bgcd_v2_case_1() external {
+        uintModInverse.ext_bgcd_v2(
+            0xffff030700000000ffffffffffffff030000000000f8ffffffff0300c0ffffff,
+            0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFE_BAAEDCE6_AF48A03B_BFD25E8C_D0364141
+        );
+
+        // 0xe06f56d8558f81fddbd19d1d68aee4415a7184142d76b9dd8368e243b2fcdaa8
     }
 
     function test_modinv() external {
