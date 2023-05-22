@@ -362,34 +362,6 @@ library uintModInverse {
         }
     }
 
-    // function ext_bgcd(int256 y, int256 m) internal pure returns (int256) {
-    //     (int a, int u, int b, int v) = (y, 1, m, 0);
-
-    //     while (a != 0) {
-    //         if (a % 2 == 0) {
-    //             // a is even, so this division is exact
-    //             a /= 2;
-    //             u = (u / 2) % m;
-    //         } else {
-    //             if (a < b) {
-    //                 // conditional swap to ensure a ≥ b
-    //                 (a, u, b, v) = (b, v, a, u);
-    //             }
-    //             // a and b are odd, so this division is exact.
-    //             a = (a - b) / 2;
-    //             u = ((u - v) / 2) % m;
-    //         }
-    //     }
-
-    //     if (b != 1) {
-    //         // value y is not invertible
-    //         return 0;
-    //     }
-
-    //     // b contains GCD(y, m) at this point
-    //     return v;
-    // }
-
     /* Determine the number of trailing zero bits in a (non-zero) 64-bit x. */
     function ctz(uint a) internal pure returns (uint) {
         // @todo this algorithm could be optimized
