@@ -285,9 +285,9 @@ library uintModInverse {
         (a, u, b, v) = (y, 1, m, 0);
 
         while (a != 0) {
-            while (a % 2 == 0) {
+            while (a & 1 == 0) {
                 a >>= 1;
-                if (u % 2 == 0) {
+                if (u & 1 == 0) {
                     u = (u >> 1) % m;
                 } else {
                     // @todo double check if its correct to add +1 outside of addmod
@@ -302,9 +302,9 @@ library uintModInverse {
                 }
             }
 
-            while (b % 2 == 0) {
+            while (b & 1 == 0) {
                 b >>= 1;
-                if (v % 2 == 0) {
+                if (v & 1 == 0) {
                     v = (v >> 1) % m;
                 } else {
                     v = (addmod(v >> 1, m >> 1, m) + 1) % m; // v = ((v + m) / 2) % m
