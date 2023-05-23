@@ -131,7 +131,7 @@ library scalar {
     }
 
     function scalar_inverse(uint256 x) internal pure returns (uint256) {
-        uint256 r = uintModInverse.modinv(x, SECP256K1_N);
+        uint256 r = uintModInverse.modinv_v4(x, SECP256K1_N);
         return r;
     }
 

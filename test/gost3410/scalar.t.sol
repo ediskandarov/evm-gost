@@ -639,7 +639,11 @@ contract ScalarTest is Test {
             assertEqUint(z, r1);
 
             if (y != 0) {
-                uint zz = scalar.scalar_inverse(x);
+                uint zz = scalar.scalar_inverse(y);
+                uint zm = scalar.scalar_mul(z, zz);
+                assertEqUint(x, zm);
+                uint zmy = scalar.scalar_mul(zz, y);
+                assertEqUint(zmy, 1);
             }
         }
     }
