@@ -70,6 +70,8 @@ library CurveLib {
         }
     }
 
+    // function doubling() internal pure
+
     function _add(
         Curve memory curve,
         uint p1x,
