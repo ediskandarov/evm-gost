@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import "../../src/gost/Streebog.sol";
+import "../../src/gost3411/Streebog.sol";
 
 contract StreebogTest is Test {
     Streebog streebog;

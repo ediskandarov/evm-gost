@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import "../../src/gost/uintGostUtils.sol";
+import "../../src/gost3411/uintGostUtils.sol";
 
 contract uintGostUtilsTest is Test {
     using uintGostUtils for uint;

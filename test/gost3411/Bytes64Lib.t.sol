@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import "../../src/gost/Bytes64Lib.sol";
+import "../../src/gost3411/Bytes64Lib.sol";
 
 contract TestBytes64LibTest is Test {
     using Bytes64Lib for bytes;
