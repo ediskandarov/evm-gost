@@ -7,63 +7,8 @@ import "../../src/gost3410/intModInverse.sol";
 contract intModInverseTest is Test {
     using uintModInverse for uint;
 
-    function test_bgcd_1() external {
-        assertEq(uintModInverse.bgcd(11, 35), 1);
-    }
-
-    function test_bgcd_2() external {
-        assertEq(
-            uintModInverse.bgcd(
-                6322610860491544216932366519095,
-                177213750118348710766018615863777
-            ),
-            180646024585472691912353329117
-        );
-    }
-
-    function test_ext_bgcd() external {
-        (int a, int b, int v) = uintModInverse.ext_bgcd(693, 609);
-        assertEq(a, -181);
-        assertEq(b, 206);
-        assertEq(v, 21);
-    }
-
     function test_ext_bgcd_1() external {
-        (int a, int b, int v) = uintModInverse.ext_bgcd(609, 693);
-        assertEq(a, 173);
-        assertEq(b, -152);
-        assertEq(v, 21);
-    }
-
-    function test_ext_bgcd_v2() external {
-        (uint v, uint a, bool isAPos) = uintModInverse.ext_bgcd_v2(693, 609);
-        assertEq(a, 181);
-        assertFalse(isAPos);
-        // assertEq(b, 206);
-        // assertTrue(isBPos);
-        assertEq(v, 21);
-    }
-
-    function test_ext_bgcd_v2_1() external {
-        (uint v, uint a, bool isAPos) = uintModInverse.ext_bgcd_v2(609, 693);
-        assertEq(a, 173);
-        assertTrue(isAPos);
-        // assertEq(b, 206);
-        // assertTrue(isBPos);
-        assertEq(v, 21);
-    }
-
-    function test_ext_bgcd_v3_1() external {
-        (uint v, uint a, bool isAPos) = uintModInverse.ext_bgcd_v3(609, 693);
-        assertEq(a, 173);
-        assertTrue(isAPos);
-        // assertEq(b, 206);
-        // assertTrue(isBPos);
-        assertEq(v, 21);
-    }
-
-    function test_ext_bgcd_v4_1() external {
-        (uint v, uint a) = uintModInverse.ext_bgcd_v4(609, 693);
+        (uint v, uint a) = uintModInverse.ext_bgcd(609, 693);
         assertEq(a, 173);
         // assertTrue(isAPos);
         // assertEq(b, 206);
@@ -71,8 +16,8 @@ contract intModInverseTest is Test {
         assertEq(v, 21);
     }
 
-    function test_modinv_v4_case_1() external {
-        uint x = uintModInverse.modinv_v4(
+    function test_modinv_case_1() external {
+        uint x = uintModInverse.modinv(
             0xffff030700000000ffffffffffffff030000000000f8ffffffff0300c0ffffff,
             0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFE_BAAEDCE6_AF48A03B_BFD25E8C_D0364141
         );
@@ -90,38 +35,11 @@ contract intModInverseTest is Test {
         assertEq(uint(38).modinv(93), 71);
     }
 
-    function test_modulo_operation() external {
-        assertEq(uintModInverse.modulo_v2(145, true, 51), 43);
-        assertEq(uintModInverse.modulo_v2(145, false, 51), 8);
-        assertEq(uintModInverse.modulo_v2(51, true, 145), 51);
-        assertEq(uintModInverse.modulo_v2(51, false, 145), 94);
-    }
-
     function test_addmod() external {
         uint a = 0xffff030700000000ffffffffffffff030000000000f8ffffffff0300c0ffffff;
         uint b = 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFE_BAAEDCE6_AF48A03B_BFD25E8C_D0364141;
         assertEq(addmod(a, b, b), a);
     }
-
-    function submod(uint a, uint b, uint m) internal pure returns (uint) {
-        if (a > b) {
-            return (a - b) % b;
-        } else {
-            return (b - (b - a)) % b;
-        }
-    }
-
-    // function test_submod() external {
-    //     uint a = 0xffff030700000000ffffffffffffff030000000000f8ffffffff0300c0ffffff;
-    //     uint b = 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFE_BAAEDCE6_AF48A03B_BFD25E8C_D0364141;
-
-    //     assertEq(submod(a, b, b), a);
-
-    //     assertEq(
-    //         submod(b, a, b),
-    //         0xfcf8ffffffff00000000000000fbbaaedce6ae4fa03bbfd35b8c0f364142
-    //     );
-    // }
 
     function test_half_mod() external {
         uint256 m = 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFE_BAAEDCE6_AF48A03B_BFD25E8C_D0364141;
