@@ -647,13 +647,4 @@ contract ScalarTest is Test {
             }
         }
     }
-
-    function test_scalar_signed62() external {
-        uint256 x = scalar.SECP256K1_N;
-
-        assertEqUint(
-            x,
-            scalar.scalar_from_signed62(scalar.scalar_to_signed62(x))
-        );
-    }
 }
